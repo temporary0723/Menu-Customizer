@@ -34,14 +34,12 @@
     width: 90%;
     max-width: 600px;
     max-height: 85vh;
-    min-height: 200px;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     transform: scale(0.9) translateY(-20px);
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
 }
 
 .menu-customizer-modal.visible {
@@ -947,37 +945,122 @@
     filter: brightness(1.1);
 }
 
-/* ===== 반응형 - 작은 화면 ===== */
-@media screen and (max-height: 600px) {
+/* ===== 반응형 디자인 ===== */
+
+/* 태블릿 (950px 이하) */
+@media (max-width: 950px) {
     .menu-customizer-modal-backdrop {
         align-items: flex-start;
+        padding-top: 3vh;
+        padding-bottom: 3vh;
         overflow-y: auto;
-        padding: 10px;
     }
     
     .menu-customizer-modal {
+        width: 95vw;
+        max-width: none;
         max-height: none;
-        margin: 10px auto;
+        height: auto;
+        min-height: 0;
+        position: relative;
+        margin: 0 auto;
+        flex-shrink: 0;
     }
-}
-
-@media screen and (max-width: 500px) {
-    .menu-customizer-modal {
-        width: 95%;
-        border-radius: 8px;
+    
+    .menu-customizer-modal.visible {
+        transform: scale(1);
+    }
+    
+    .menu-customizer-body {
+        max-height: 60vh;
     }
     
     .menu-customizer-header {
-        padding: 12px 14px;
+        padding: 12px 16px;
     }
     
     .menu-customizer-header h3 {
         font-size: 16px;
     }
+}
+
+/* 중간 크기 화면 (768px 이하) */
+@media (max-width: 768px) {
+    .menu-customizer-modal-backdrop {
+        padding-top: 2vh;
+        padding-bottom: 2vh;
+    }
+    
+    .menu-customizer-modal {
+        width: 96vw;
+        border-radius: 10px;
+    }
+    
+    .menu-customizer-body {
+        max-height: 55vh;
+    }
     
     .menu-customizer-tabs {
         gap: 4px;
-        padding: 8px 10px;
+    }
+    
+    .menu-customizer-tab {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
+    .menu-customizer-item {
+        padding: 10px 12px;
+    }
+    
+    .menu-customizer-item-name {
+        font-size: 13px;
+    }
+    
+    .menu-customizer-footer {
+        padding: 12px 16px;
+        gap: 8px;
+    }
+    
+    .menu-customizer-footer button {
+        padding: 10px 14px;
+        font-size: 12px;
+    }
+}
+
+/* 스마트폰 (480px 이하) */
+@media (max-width: 480px) {
+    .menu-customizer-modal-backdrop {
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+    }
+    
+    .menu-customizer-modal {
+        width: 98vw;
+        border-radius: 8px;
+    }
+    
+    .menu-customizer-header {
+        padding: 10px 12px;
+    }
+    
+    .menu-customizer-header h3 {
+        font-size: 14px;
+        gap: 6px;
+    }
+    
+    .menu-customizer-close {
+        font-size: 22px;
+        padding: 0 4px;
+    }
+    
+    .menu-customizer-body {
+        max-height: 50vh;
+        padding: 12px;
+    }
+    
+    .menu-customizer-tabs {
+        padding: 8px 12px;
     }
     
     .menu-customizer-tab {
@@ -985,16 +1068,63 @@
         font-size: 12px;
     }
     
-    .menu-customizer-body {
-        padding: 10px;
+    .menu-customizer-item {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    
+    .menu-customizer-item-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .menu-customizer-item-name {
+        font-size: 12px;
+    }
+    
+    .menu-customizer-item-edit,
+    .menu-customizer-item-visibility {
+        padding: 4px;
+    }
+    
+    .menu-customizer-category-header {
+        padding: 10px 12px;
+    }
+    
+    .menu-customizer-category-name {
+        font-size: 13px;
     }
     
     .menu-customizer-footer {
-        padding: 10px;
+        padding: 10px 12px;
         flex-direction: column;
     }
     
     .menu-customizer-footer button {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    /* 이름 수정 모달 반응형 */
+    .menu-customizer-edit-name-modal {
+        width: 95vw;
+        max-width: none;
+    }
+    
+    .edit-name-header {
+        padding: 12px 14px;
+    }
+    
+    .edit-name-body {
+        padding: 14px;
+    }
+    
+    .edit-name-footer {
+        padding: 12px 14px;
+        flex-direction: column;
+    }
+    
+    .edit-name-footer button {
         width: 100%;
     }
 }
