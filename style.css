@@ -169,13 +169,37 @@
 }
 
 .menu-customizer-item.dragging {
-    opacity: 0.5;
+    opacity: 0.3;
     transform: scale(0.98);
+    pointer-events: none;
 }
 
-.menu-customizer-item.drag-over {
-    border-color: var(--SmartThemeQuoteColor, #7c7cff);
-    box-shadow: 0 0 10px rgba(124, 124, 255, 0.3);
+/* 드래그 플레이스홀더 */
+.menu-customizer-placeholder {
+    height: 48px;
+    margin: 4px 0;
+    border: 2px dashed var(--SmartThemeQuoteColor, #7c7cff);
+    border-radius: 10px;
+    background: rgba(124, 124, 255, 0.1);
+    transition: all 0.15s ease;
+    animation: placeholder-pulse 1s ease-in-out infinite;
+}
+
+@keyframes placeholder-pulse {
+    0%, 100% {
+        background: rgba(124, 124, 255, 0.08);
+        border-color: rgba(124, 124, 255, 0.4);
+    }
+    50% {
+        background: rgba(124, 124, 255, 0.15);
+        border-color: rgba(124, 124, 255, 0.7);
+    }
+}
+
+/* 카테고리 내부 플레이스홀더 */
+.menu-customizer-category-items .menu-customizer-placeholder {
+    height: 40px;
+    margin: 6px 0;
 }
 
 .menu-customizer-item.hidden-item {
@@ -409,8 +433,9 @@
     padding: 12px;
 }
 
-.menu-customizer-category-items.drag-over {
-    background: rgba(100, 100, 200, 0.2);
+/* 드래그 대상 영역 강조 */
+.menu-customizer-category-items:has(.menu-customizer-placeholder) {
+    background: rgba(100, 100, 200, 0.15);
 }
 
 .menu-customizer-category-items .menu-customizer-item {
