@@ -1144,7 +1144,7 @@ function applyChatMenuCustomizations(settings) {
         }
     });
     
-    // 숨김 처리 및 커스텀 이름 적용
+    // 숨김 처리 및 이름 적용 (커스텀 또는 원본)
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
         if ($menuItem.length > 0) {
@@ -1152,14 +1152,13 @@ function applyChatMenuCustomizations(settings) {
                 $menuItem.addClass('menu-customizer-hidden');
             }
             
-            // 커스텀 이름 적용
-            if (item.customName) {
-                const $span = $menuItem.find('span[data-i18n]');
-                if ($span.length > 0) {
-                    $span.text(item.customName);
-                } else {
-                    $menuItem.find('span').first().text(item.customName);
-                }
+            // 이름 적용 (커스텀 이름 또는 원본 이름)
+            const displayName = item.customName || item.name;
+            const $span = $menuItem.find('span[data-i18n]');
+            if ($span.length > 0) {
+                $span.text(displayName);
+            } else {
+                $menuItem.find('span').first().text(displayName);
             }
         }
     });
@@ -1264,7 +1263,7 @@ function applyExtensionMenuCustomizations(settings) {
         }
     });
     
-    // 숨김 처리 및 커스텀 이름 적용
+    // 숨김 처리 및 이름 적용 (커스텀 또는 원본)
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
         if ($menuItem.length > 0) {
@@ -1272,12 +1271,11 @@ function applyExtensionMenuCustomizations(settings) {
                 $menuItem.addClass('menu-customizer-hidden');
             }
             
-            // 커스텀 이름 적용
-            if (item.customName) {
-                const $span = $menuItem.find('span').first();
-                if ($span.length > 0) {
-                    $span.text(item.customName);
-                }
+            // 이름 적용 (커스텀 이름 또는 원본 이름)
+            const displayName = item.customName || item.name;
+            const $span = $menuItem.find('span').first();
+            if ($span.length > 0) {
+                $span.text(displayName);
             }
         }
     });
