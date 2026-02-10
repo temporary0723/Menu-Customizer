@@ -775,14 +775,18 @@
     .menu-customizer-add-modal-backdrop {
         align-items: flex-start;
         padding-top: 3vh;
+        padding-top: 3dvh;
         padding-bottom: 3vh;
+        padding-bottom: 3dvh;
     }
     
     .menu-customizer-add-modal {
         width: 95vw;
         max-width: none;
         height: 60vh;
+        height: 60dvh;
         max-height: 60vh;
+        max-height: 60dvh;
         margin: 0 auto;
         transform: scale(0.98);
     }
@@ -807,13 +811,17 @@
 @media (max-width: 480px) {
     .menu-customizer-add-modal-backdrop {
         padding-top: 2vh;
+        padding-top: 2dvh;
         padding-bottom: 2vh;
+        padding-bottom: 2dvh;
     }
     
     .menu-customizer-add-modal {
         width: 96vw;
         height: 65vh;
+        height: 65dvh;
         max-height: 65vh;
+        max-height: 65dvh;
         border-radius: 10px;
     }
     
@@ -1104,14 +1112,18 @@
     .menu-customizer-modal-backdrop {
         align-items: flex-start;
         padding-top: 3vh;
+        padding-top: 3dvh;
         padding-bottom: 3vh;
+        padding-bottom: 3dvh;
     }
     
     .menu-customizer-modal {
         width: 95vw;
         max-width: none;
         height: 94vh;
+        height: 94dvh;
         max-height: 94vh;
+        max-height: 94dvh;
         position: relative;
         margin: 0 auto;
         transform: scale(0.98);
@@ -1149,13 +1161,17 @@
 @media (max-width: 768px) {
     .menu-customizer-modal-backdrop {
         padding-top: 2vh;
+        padding-top: 2dvh;
         padding-bottom: 2vh;
+        padding-bottom: 2dvh;
     }
     
     .menu-customizer-modal {
         width: 96vw;
         height: 96vh;
+        height: 96dvh;
         max-height: 96vh;
+        max-height: 96dvh;
         border-radius: 10px;
     }
     
@@ -1191,13 +1207,17 @@
 @media (max-width: 480px) {
     .menu-customizer-modal-backdrop {
         padding-top: 2vh;
+        padding-top: 2dvh;
         padding-bottom: 2vh;
+        padding-bottom: 2dvh;
     }
     
     .menu-customizer-modal {
         width: 98vw;
         height: 96vh;
+        height: 96dvh;
         max-height: 96vh;
+        max-height: 96dvh;
         border-radius: 8px;
     }
     
