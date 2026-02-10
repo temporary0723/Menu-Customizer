@@ -1190,6 +1190,15 @@ function applyExtensionMenuCustomizations(settings) {
             }
         });
     });
+    
+    // 순서 재정렬 (카테고리에 속하지 않은 항목들, 순서대로)
+    const uncategorizedItems = sortedItems.filter(item => !item.categoryId && !item.hidden);
+    uncategorizedItems.forEach((item) => {
+        const $menuItem = $(`#${item.id}`);
+        if ($menuItem.length > 0 && !$menuItem.closest('.menu-customizer-category-wrapper').length) {
+            $extensionsMenu.append($menuItem);
+        }
+    });
 }
 
 /**
