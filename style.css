@@ -739,9 +739,10 @@
     background: rgba(0, 0, 0, 0.8);
     z-index: 10000;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
+    padding-top: 5vh;
+    padding-bottom: 5vh;
     box-sizing: border-box;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -759,31 +760,20 @@
     border-radius: 12px;
     width: 90%;
     max-width: 450px;
-    max-height: calc(100vh - 40px);
+    height: auto;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-    transform: scale(0.9) translateY(-20px);
+    transform: scale(0.9);
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    margin: auto;
+    flex-shrink: 0;
 }
 
 .menu-customizer-add-modal.visible {
-    transform: scale(1) translateY(0);
+    transform: scale(1);
     opacity: 1;
-}
-
-/* 모바일 대응 */
-@media (max-height: 600px) {
-    .menu-customizer-add-modal-backdrop {
-        align-items: flex-start;
-        padding: 10px;
-    }
-    
-    .menu-customizer-add-modal {
-        max-height: calc(100vh - 20px);
-    }
 }
 
 .menu-customizer-add-modal-header {
