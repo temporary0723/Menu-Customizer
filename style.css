@@ -482,12 +482,17 @@
 }
 
 #options .menu-customizer-category-content {
-    display: none;
+    display: none !important;
     padding-left: 20px;
+    flex-direction: column;
 }
 
 #options .menu-customizer-category-content.expanded {
-    display: block;
+    display: flex !important;
+}
+
+#options .menu-customizer-category-content > a {
+    display: flex !important;
 }
 
 /* ===== 실제 메뉴 카테고리 스타일 (확장 메뉴) ===== */
@@ -509,12 +514,17 @@
 }
 
 #extensionsMenu .menu-customizer-category-content {
-    display: none;
+    display: none !important;
     padding-left: 16px;
+    flex-direction: column;
 }
 
 #extensionsMenu .menu-customizer-category-content.expanded {
-    display: block;
+    display: flex !important;
+}
+
+#extensionsMenu .menu-customizer-category-content > div {
+    display: flex !important;
 }
 
 /* ===== 스크롤바 스타일 ===== */

@@ -880,21 +880,31 @@ function applyChatMenuCustomizations(settings) {
     const $optionsContent = $('#options .options-content');
     if ($optionsContent.length === 0) return;
     
-    // 숨김 처리
+    // 기존 커스텀 카테고리에서 항목들을 원래 위치로 복원
+    $optionsContent.find('.menu-customizer-category-wrapper').each(function() {
+        $(this).find('.menu-customizer-category-content > a').each(function() {
+            $optionsContent.append($(this));
+        });
+    });
+    
+    // 기존 커스텀 카테고리 제거
+    $optionsContent.find('.menu-customizer-category-wrapper').remove();
+    
+    // 모든 항목 표시 초기화
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
         if ($menuItem.length > 0) {
-            if (item.hidden) {
-                $menuItem.addClass('menu-customizer-hidden');
-            } else {
-                $menuItem.removeClass('menu-customizer-hidden');
-            }
+            $menuItem.removeClass('menu-customizer-hidden');
         }
     });
     
-    // 카테고리 처리
-    // 기존 커스텀 카테고리 제거
-    $optionsContent.find('.menu-customizer-category-wrapper').remove();
+    // 숨김 처리
+    settings.items.forEach(item => {
+        const $menuItem = $(`#${item.id}`);
+        if ($menuItem.length > 0 && item.hidden) {
+            $menuItem.addClass('menu-customizer-hidden');
+        }
+    });
     
     // 카테고리 생성
     settings.categories.forEach(category => {
@@ -916,13 +926,13 @@ function applyChatMenuCustomizations(settings) {
         `;
         
         const $categoryWrapper = $(categoryHtml);
+        $optionsContent.prepend($categoryWrapper);
         
-        // 카테고리에 속한 항목들을 카테고리 내부로 이동
+        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동)
         categoryItems.forEach(item => {
             const $menuItem = $(`#${item.id}`);
             if ($menuItem.length > 0) {
-                $categoryWrapper.find('.menu-customizer-category-content').append($menuItem.clone().removeClass('menu-customizer-hidden'));
-                $menuItem.addClass('menu-customizer-hidden');
+                $categoryWrapper.find('.menu-customizer-category-content').append($menuItem);
             }
         });
         
@@ -955,8 +965,6 @@ function applyChatMenuCustomizations(settings) {
                 saveSettingsDebounced();
             }
         });
-        
-        $optionsContent.prepend($categoryWrapper);
     });
     
     // 순서 재정렬 (카테고리에 속하지 않은 항목들)
@@ -976,21 +984,31 @@ function applyExtensionMenuCustomizations(settings) {
     const $extensionsMenu = $('#extensionsMenu');
     if ($extensionsMenu.length === 0) return;
     
-    // 숨김 처리
+    // 기존 커스텀 카테고리에서 항목들을 원래 위치로 복원
+    $extensionsMenu.find('.menu-customizer-category-wrapper').each(function() {
+        $(this).find('.menu-customizer-category-content').children().each(function() {
+            $extensionsMenu.append($(this));
+        });
+    });
+    
+    // 기존 커스텀 카테고리 제거
+    $extensionsMenu.find('.menu-customizer-category-wrapper').remove();
+    
+    // 모든 항목 표시 초기화
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
         if ($menuItem.length > 0) {
-            if (item.hidden) {
-                $menuItem.addClass('menu-customizer-hidden');
-            } else {
-                $menuItem.removeClass('menu-customizer-hidden');
-            }
+            $menuItem.removeClass('menu-customizer-hidden');
         }
     });
     
-    // 카테고리 처리
-    // 기존 커스텀 카테고리 제거
-    $extensionsMenu.find('.menu-customizer-category-wrapper').remove();
+    // 숨김 처리
+    settings.items.forEach(item => {
+        const $menuItem = $(`#${item.id}`);
+        if ($menuItem.length > 0 && item.hidden) {
+            $menuItem.addClass('menu-customizer-hidden');
+        }
+    });
     
     // 카테고리 생성
     settings.categories.forEach(category => {
@@ -1012,13 +1030,13 @@ function applyExtensionMenuCustomizations(settings) {
         `;
         
         const $categoryWrapper = $(categoryHtml);
+        $extensionsMenu.prepend($categoryWrapper);
         
-        // 카테고리에 속한 항목들을 카테고리 내부로 이동
+        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동)
         categoryItems.forEach(item => {
             const $menuItem = $(`#${item.id}`);
             if ($menuItem.length > 0) {
-                $categoryWrapper.find('.menu-customizer-category-content').append($menuItem.clone().removeClass('menu-customizer-hidden'));
-                $menuItem.addClass('menu-customizer-hidden');
+                $categoryWrapper.find('.menu-customizer-category-content').append($menuItem);
             }
         });
         
@@ -1051,8 +1069,6 @@ function applyExtensionMenuCustomizations(settings) {
                 saveSettingsDebounced();
             }
         });
-        
-        $extensionsMenu.prepend($categoryWrapper);
     });
 }
 
