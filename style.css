@@ -265,49 +265,6 @@
     color: #666;
 }
 
-/* 아이콘 숨기기 토글 */
-.menu-customizer-item-hide-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-.menu-customizer-item-hide-icon:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.menu-customizer-item-hide-icon input {
-    display: none;
-}
-
-.menu-customizer-item-hide-icon i {
-    font-size: 14px;
-    color: #7c7cff;
-    opacity: 0.8;
-}
-
-.menu-customizer-item-hide-icon:hover i {
-    opacity: 1;
-}
-
-.menu-customizer-item-hide-icon.icon-is-hidden i {
-    color: #888;
-    opacity: 0.5;
-}
-
-/* 커스텀 창에서 아이콘 숨김 표시 */
-.menu-customizer-item-icon.icon-hidden {
-    opacity: 0.3;
-}
-
-.menu-customizer-item-icon.icon-hidden i {
-    text-decoration: line-through;
-}
-
 /* 실제 메뉴에서 아이콘 숨기기 */
 .menu-customizer-icon-hidden {
     display: none !important;
@@ -455,14 +412,57 @@
 /* ===== 모달 푸터 ===== */
 .menu-customizer-footer {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 12px;
     padding: 16px 20px;
     border-top: 1px solid var(--SmartThemeBorderColor, #3a3a5a);
     background: rgba(0, 0, 0, 0.2);
 }
 
-.menu-customizer-footer button {
-    flex: 1;
+.menu-customizer-footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.menu-customizer-footer-right {
+    display: flex;
+    gap: 12px;
+}
+
+.menu-customizer-hide-icons-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(100, 100, 200, 0.15);
+    border: 1px solid rgba(100, 100, 200, 0.3);
+    transition: all 0.2s;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font-size: 13px;
+}
+
+.menu-customizer-hide-icons-toggle:hover {
+    background: rgba(100, 100, 200, 0.25);
+    border-color: rgba(100, 100, 200, 0.5);
+}
+
+.menu-customizer-hide-icons-toggle input {
+    display: none;
+}
+
+.menu-customizer-hide-icons-toggle i {
+    font-size: 14px;
+    color: #7c7cff;
+}
+
+.menu-customizer-hide-icons-toggle i.fa-image-slash {
+    color: #888;
+}
+
+.menu-customizer-footer-right button {
     padding: 10px 16px;
     border: none;
     border-radius: 8px;

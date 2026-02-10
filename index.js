@@ -289,12 +289,21 @@ async function createMenuCustomizerModal() {
                     </div>
                 </div>
                 <div class="menu-customizer-footer">
-                    <button class="menu-customizer-add-category">
-                        <i class="fa-solid fa-folder-plus"></i> 새 카테고리 추가
-                    </button>
-                    <button class="menu-customizer-reset">
-                        <i class="fa-solid fa-rotate-left"></i> 초기화
-                    </button>
+                    <div class="menu-customizer-footer-left">
+                        <label class="menu-customizer-hide-icons-toggle" title="메뉴의 모든 아이콘 숨기기">
+                            <input type="checkbox" class="hide-all-icons-checkbox" data-menu-type="chatMenu" ${extension_settings[pluginName]?.chatMenu?.hideAllIcons ? 'checked' : ''}>
+                            <i class="fa-solid ${extension_settings[pluginName]?.chatMenu?.hideAllIcons ? 'fa-image-slash' : 'fa-image'}"></i>
+                            <span>아이콘 숨기기</span>
+                        </label>
+                    </div>
+                    <div class="menu-customizer-footer-right">
+                        <button class="menu-customizer-add-category">
+                            <i class="fa-solid fa-folder-plus"></i> 새 카테고리 추가
+                        </button>
+                        <button class="menu-customizer-reset">
+                            <i class="fa-solid fa-rotate-left"></i> 초기화
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -396,7 +405,6 @@ function renderCategory(category, items, menuType) {
  */
 function renderMenuItem(item, menuType, isInCategory = false) {
     const isHidden = item.hidden === true;
-    const isIconHidden = item.hideIcon === true;
     const displayName = item.customName || item.name;
     const hasCustomName = item.customName && item.customName !== item.name;
     
@@ -409,7 +417,7 @@ function renderMenuItem(item, menuType, isInCategory = false) {
             <div class="menu-customizer-item-drag">
                 <i class="fa-solid fa-grip-vertical"></i>
             </div>
-            <div class="menu-customizer-item-icon ${isIconHidden ? 'icon-hidden' : ''}">
+            <div class="menu-customizer-item-icon">
                 <i class="fa-solid ${item.icon || 'fa-question'}"></i>
             </div>
             <div class="menu-customizer-item-name ${hasCustomName ? 'custom-name' : ''}">${displayName}</div>
@@ -417,10 +425,6 @@ function renderMenuItem(item, menuType, isInCategory = false) {
                 <button class="menu-customizer-item-edit" title="이름 수정">
                     <i class="fa-solid fa-pencil"></i>
                 </button>
-                <label class="menu-customizer-item-hide-icon ${isIconHidden ? 'icon-is-hidden' : ''}" title="${isIconHidden ? '아이콘 표시' : '아이콘 숨기기'}">
-                    <input type="checkbox" ${!isIconHidden ? 'checked' : ''}>
-                    <i class="fa-solid ${isIconHidden ? 'fa-image-slash' : 'fa-image'}"></i>
-                </label>
                 <label class="menu-customizer-item-visibility" title="${isHidden ? '표시' : '숨기기'}">
                     <input type="checkbox" ${!isHidden ? 'checked' : ''}>
                     <i class="fa-solid ${isHidden ? 'fa-toggle-off' : 'fa-toggle-on'}"></i>
@@ -455,6 +459,19 @@ function bindModalEventHandlers() {
         
         currentModal.find('.menu-customizer-content').hide();
         currentModal.find(`.menu-customizer-content[data-content="${tab}"]`).show();
+        
+        // 아이콘 숨기기 토글 상태 업데이트
+        const hideAllIcons = extension_settings[pluginName]?.[tab]?.hideAllIcons || false;
+        const $checkbox = currentModal.find('.hide-all-icons-checkbox');
+        $checkbox.data('menu-type', tab);
+        $checkbox.prop('checked', hideAllIcons);
+        
+        const $label = $checkbox.closest('.menu-customizer-hide-icons-toggle');
+        if (hideAllIcons) {
+            $label.find('i').removeClass('fa-image').addClass('fa-image-slash');
+        } else {
+            $label.find('i').removeClass('fa-image-slash').addClass('fa-image');
+        }
     });
 
     // 카테고리 토글 (펼치기/접기)
@@ -546,32 +563,6 @@ function bindModalEventHandlers() {
         editItemName(menuType, itemId);
     });
 
-    // 아이콘 숨기기/표시
-    currentModal.on('change', '.menu-customizer-item-hide-icon input', function() {
-        const item = $(this).closest('.menu-customizer-item');
-        const itemId = item.data('item-id');
-        const menuType = item.data('menu-type');
-        const showIcon = $(this).is(':checked');
-        
-        toggleItemIcon(menuType, itemId, !showIcon);
-        
-        // UI 업데이트
-        const $label = $(this).closest('.menu-customizer-item-hide-icon');
-        const $icon = item.find('.menu-customizer-item-icon');
-        
-        if (showIcon) {
-            $label.removeClass('icon-is-hidden');
-            $label.find('i').removeClass('fa-image-slash').addClass('fa-image');
-            $label.attr('title', '아이콘 숨기기');
-            $icon.removeClass('icon-hidden');
-        } else {
-            $label.addClass('icon-is-hidden');
-            $label.find('i').removeClass('fa-image').addClass('fa-image-slash');
-            $label.attr('title', '아이콘 표시');
-            $icon.addClass('icon-hidden');
-        }
-    });
-
     // 새 카테고리 추가
     currentModal.find('.menu-customizer-add-category').on('click', function() {
         const activeTab = currentModal.find('.menu-customizer-tab.active').data('tab');
@@ -582,6 +573,22 @@ function bindModalEventHandlers() {
     currentModal.find('.menu-customizer-reset').on('click', function() {
         const activeTab = currentModal.find('.menu-customizer-tab.active').data('tab');
         resetMenuSettings(activeTab);
+    });
+
+    // 전체 아이콘 숨기기
+    currentModal.on('change', '.hide-all-icons-checkbox', function() {
+        const menuType = $(this).data('menu-type');
+        const hideIcons = $(this).is(':checked');
+        
+        toggleAllIcons(menuType, hideIcons);
+        
+        // UI 업데이트
+        const $label = $(this).closest('.menu-customizer-hide-icons-toggle');
+        if (hideIcons) {
+            $label.find('i').removeClass('fa-image').addClass('fa-image-slash');
+        } else {
+            $label.find('i').removeClass('fa-image-slash').addClass('fa-image');
+        }
     });
 
     // 드래그 앤 드롭 이벤트
@@ -747,17 +754,13 @@ function toggleItemVisibility(menuType, itemId, hidden) {
 }
 
 /**
- * 항목 아이콘 숨기기/표시 토글
+ * 전체 아이콘 숨기기/표시 토글
  */
-function toggleItemIcon(menuType, itemId, hideIcon) {
+function toggleAllIcons(menuType, hideIcons) {
     const settings = extension_settings[pluginName][menuType];
-    const item = settings.items.find(i => i.id === itemId);
-    
-    if (item) {
-        item.hideIcon = hideIcon;
-        saveSettingsDebounced();
-        applyMenuCustomizations(menuType);
-    }
+    settings.hideAllIcons = hideIcons;
+    saveSettingsDebounced();
+    applyMenuCustomizations(menuType);
 }
 
 /**
@@ -1206,10 +1209,10 @@ function applyChatMenuCustomizations(settings) {
                 $menuItem.find('span').first().text(displayName);
             }
             
-            // 아이콘 숨기기
+            // 아이콘 숨기기 (전체 설정)
             const $icon = $menuItem.find('i').first();
             if ($icon.length > 0) {
-                if (item.hideIcon) {
+                if (settings.hideAllIcons) {
                     $icon.addClass('menu-customizer-icon-hidden');
                 } else {
                     $icon.removeClass('menu-customizer-icon-hidden');
@@ -1334,9 +1337,10 @@ function applyExtensionMenuCustomizations(settings) {
             }
             
             // 아이콘 숨기기
+            // 아이콘 숨기기 (전체 설정)
             const $icon = $menuItem.find('i').first();
             if ($icon.length > 0) {
-                if (item.hideIcon) {
+                if (settings.hideAllIcons) {
                     $icon.addClass('menu-customizer-icon-hidden');
                 } else {
                     $icon.removeClass('menu-customizer-icon-hidden');
