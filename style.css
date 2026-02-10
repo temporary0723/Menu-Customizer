@@ -482,14 +482,12 @@
 }
 
 #options .menu-customizer-category-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
+    display: none;
     padding-left: 20px;
 }
 
 #options .menu-customizer-category-content.expanded {
-    max-height: 500px;
+    display: block;
 }
 
 /* ===== 실제 메뉴 카테고리 스타일 (확장 메뉴) ===== */
@@ -511,14 +509,12 @@
 }
 
 #extensionsMenu .menu-customizer-category-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
+    display: none;
     padding-left: 16px;
 }
 
 #extensionsMenu .menu-customizer-category-content.expanded {
-    max-height: 500px;
+    display: block;
 }
 
 /* ===== 스크롤바 스타일 ===== */

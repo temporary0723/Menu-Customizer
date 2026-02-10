@@ -618,6 +618,9 @@ async function addNewCategory(menuType) {
         // UI 새로고침
         refreshModalContent(menuType);
         
+        // 실제 메뉴에 적용
+        applyMenuCustomizations(menuType);
+        
         toastr.success(`카테고리 "${newCategory.name}"가 추가되었습니다.`);
     }
 }
@@ -643,6 +646,9 @@ async function editCategoryName(menuType, categoryId) {
         
         // UI 업데이트
         currentModal.find(`.menu-customizer-category[data-category-id="${categoryId}"] .menu-customizer-category-name`).text(category.name);
+        
+        // 실제 메뉴에 적용
+        applyMenuCustomizations(menuType);
         
         toastr.success('카테고리 이름이 수정되었습니다.');
     }
@@ -677,6 +683,9 @@ async function deleteCategory(menuType, categoryId) {
         
         // UI 새로고침
         refreshModalContent(menuType);
+        
+        // 실제 메뉴에 적용
+        applyMenuCustomizations(menuType);
         
         toastr.success('카테고리가 삭제되었습니다.');
     }
