@@ -196,10 +196,12 @@
     color: var(--SmartThemeBodyColor, #e0e0e0);
     opacity: 0.4;
     cursor: grab;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    touch-action: none;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    touch-action: none !important;
 }
 
 .menu-customizer-item-drag:active {
@@ -207,17 +209,32 @@
 }
 
 /* 모바일 드래그 지원 */
-.menu-customizer-item[draggable="true"] {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    touch-action: none;
+.menu-customizer-item[draggable="true"],
+.menu-customizer-item {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    touch-action: manipulation;
+}
+
+.menu-customizer-item * {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
 }
 
 .menu-customizer-list {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
+.menu-customizer-body {
+    -webkit-touch-callout: none !important;
 }
 
 .menu-customizer-item-icon {

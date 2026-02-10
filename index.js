@@ -634,16 +634,29 @@ function setupDragAndDrop() {
     
     // ===== 터치 이벤트 지원 (모바일) =====
     let touchStartY = 0;
+    let touchStartX = 0;
     let touchCurrentY = 0;
     let touchDraggedItem = null;
     let touchPlaceholder = null;
     let longPressTimer = null;
     let isDragging = false;
     
+    // 컨텍스트 메뉴 방지 (모바일 롱프레스 메뉴)
+    currentModal.on('contextmenu', '.menu-customizer-item, .menu-customizer-item-drag', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+    
     // 터치 시작 (롱프레스로 드래그 시작)
     currentModal.on('touchstart', '.menu-customizer-item', function(e) {
         const $item = $(this);
-        touchStartY = e.originalEvent.touches[0].clientY;
+        const touch = e.originalEvent.touches[0];
+        touchStartY = touch.clientY;
+        touchStartX = touch.clientX;
+        
+        // 기본 동작 방지 (브라우저 컨텍스트 메뉴 등)
+        e.preventDefault();
         
         // 롱프레스 감지 (300ms)
         longPressTimer = setTimeout(() => {
