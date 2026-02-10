@@ -396,6 +396,7 @@ function renderCategory(category, items, menuType) {
  */
 function renderMenuItem(item, menuType, isInCategory = false) {
     const isHidden = item.hidden === true;
+    const isIconHidden = item.hideIcon === true;
     const displayName = item.customName || item.name;
     const hasCustomName = item.customName && item.customName !== item.name;
     
@@ -408,7 +409,7 @@ function renderMenuItem(item, menuType, isInCategory = false) {
             <div class="menu-customizer-item-drag">
                 <i class="fa-solid fa-grip-vertical"></i>
             </div>
-            <div class="menu-customizer-item-icon">
+            <div class="menu-customizer-item-icon ${isIconHidden ? 'icon-hidden' : ''}">
                 <i class="fa-solid ${item.icon || 'fa-question'}"></i>
             </div>
             <div class="menu-customizer-item-name ${hasCustomName ? 'custom-name' : ''}">${displayName}</div>
@@ -416,6 +417,10 @@ function renderMenuItem(item, menuType, isInCategory = false) {
                 <button class="menu-customizer-item-edit" title="이름 수정">
                     <i class="fa-solid fa-pencil"></i>
                 </button>
+                <label class="menu-customizer-item-hide-icon ${isIconHidden ? 'icon-is-hidden' : ''}" title="${isIconHidden ? '아이콘 표시' : '아이콘 숨기기'}">
+                    <input type="checkbox" ${!isIconHidden ? 'checked' : ''}>
+                    <i class="fa-solid ${isIconHidden ? 'fa-image-slash' : 'fa-image'}"></i>
+                </label>
                 <label class="menu-customizer-item-visibility" title="${isHidden ? '표시' : '숨기기'}">
                     <input type="checkbox" ${!isHidden ? 'checked' : ''}>
                     <i class="fa-solid ${isHidden ? 'fa-toggle-off' : 'fa-toggle-on'}"></i>
@@ -539,6 +544,32 @@ function bindModalEventHandlers() {
         const itemId = item.data('item-id');
         const menuType = item.data('menu-type');
         editItemName(menuType, itemId);
+    });
+
+    // 아이콘 숨기기/표시
+    currentModal.on('change', '.menu-customizer-item-hide-icon input', function() {
+        const item = $(this).closest('.menu-customizer-item');
+        const itemId = item.data('item-id');
+        const menuType = item.data('menu-type');
+        const showIcon = $(this).is(':checked');
+        
+        toggleItemIcon(menuType, itemId, !showIcon);
+        
+        // UI 업데이트
+        const $label = $(this).closest('.menu-customizer-item-hide-icon');
+        const $icon = item.find('.menu-customizer-item-icon');
+        
+        if (showIcon) {
+            $label.removeClass('icon-is-hidden');
+            $label.find('i').removeClass('fa-image-slash').addClass('fa-image');
+            $label.attr('title', '아이콘 숨기기');
+            $icon.removeClass('icon-hidden');
+        } else {
+            $label.addClass('icon-is-hidden');
+            $label.find('i').removeClass('fa-image').addClass('fa-image-slash');
+            $label.attr('title', '아이콘 표시');
+            $icon.addClass('icon-hidden');
+        }
     });
 
     // 새 카테고리 추가
@@ -710,6 +741,20 @@ function toggleItemVisibility(menuType, itemId, hidden) {
     
     if (item) {
         item.hidden = hidden;
+        saveSettingsDebounced();
+        applyMenuCustomizations(menuType);
+    }
+}
+
+/**
+ * 항목 아이콘 숨기기/표시 토글
+ */
+function toggleItemIcon(menuType, itemId, hideIcon) {
+    const settings = extension_settings[pluginName][menuType];
+    const item = settings.items.find(i => i.id === itemId);
+    
+    if (item) {
+        item.hideIcon = hideIcon;
         saveSettingsDebounced();
         applyMenuCustomizations(menuType);
     }
@@ -1144,7 +1189,7 @@ function applyChatMenuCustomizations(settings) {
         }
     });
     
-    // 숨김 처리 및 이름 적용 (커스텀 또는 원본)
+    // 숨김 처리, 이름 적용, 아이콘 숨기기 (커스텀 또는 원본)
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
         if ($menuItem.length > 0) {
@@ -1159,6 +1204,16 @@ function applyChatMenuCustomizations(settings) {
                 $span.text(displayName);
             } else {
                 $menuItem.find('span').first().text(displayName);
+            }
+            
+            // 아이콘 숨기기
+            const $icon = $menuItem.find('i').first();
+            if ($icon.length > 0) {
+                if (item.hideIcon) {
+                    $icon.addClass('menu-customizer-icon-hidden');
+                } else {
+                    $icon.removeClass('menu-customizer-icon-hidden');
+                }
             }
         }
     });
@@ -1263,7 +1318,7 @@ function applyExtensionMenuCustomizations(settings) {
         }
     });
     
-    // 숨김 처리 및 이름 적용 (커스텀 또는 원본)
+    // 숨김 처리, 이름 적용, 아이콘 숨기기 (커스텀 또는 원본)
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
         if ($menuItem.length > 0) {
@@ -1276,6 +1331,16 @@ function applyExtensionMenuCustomizations(settings) {
             const $span = $menuItem.find('span').first();
             if ($span.length > 0) {
                 $span.text(displayName);
+            }
+            
+            // 아이콘 숨기기
+            const $icon = $menuItem.find('i').first();
+            if ($icon.length > 0) {
+                if (item.hideIcon) {
+                    $icon.addClass('menu-customizer-icon-hidden');
+                } else {
+                    $icon.removeClass('menu-customizer-icon-hidden');
+                }
             }
         }
     });
