@@ -429,12 +429,14 @@
 }
 
 .menu-customizer-add-category {
-    background: linear-gradient(135deg, #4ade80, #22c55e);
-    color: white;
+    background: rgba(74, 222, 128, 0.15);
+    color: #6ee7a0;
+    border: 1px solid rgba(74, 222, 128, 0.3) !important;
 }
 
 .menu-customizer-add-category:hover {
-    filter: brightness(1.1);
+    background: rgba(74, 222, 128, 0.25);
+    border-color: rgba(74, 222, 128, 0.5) !important;
     transform: translateY(-1px);
 }
 
