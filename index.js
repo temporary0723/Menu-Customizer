@@ -93,12 +93,15 @@ function collectExtensionMenuItems() {
     
     if (extensionsMenu.length === 0) return items;
 
-    extensionsMenu.children().each((index, element) => {
-        const $el = $(element);
+    // 직접 자식과 카테고리 안의 항목들 모두 수집
+    const collectFromElement = ($el, index) => {
         const id = $el.attr('id');
         
-        // ID가 없거나 빈 요소는 건너뛰기
-        if (!id || $el.is('hr') || $el.css('display') === 'none') return;
+        // ID가 없거나 빈 요소, 커스텀 카테고리는 건너뛰기
+        if (!id || $el.is('hr') || $el.hasClass('menu-customizer-category-wrapper')) return;
+        
+        // 메뉴 커스터마이저 버튼은 제외
+        if (id === 'menu_customizer_button') return;
         
         // 텍스트 내용 추출
         let name = $el.find('span').text().trim() || $el.text().trim() || id;
@@ -114,12 +117,31 @@ function collectExtensionMenuItems() {
             }
         }
 
-        items.push({
-            id: id,
-            name: name,
-            icon: icon,
-            originalOrder: index
-        });
+        // 이미 수집된 ID는 건너뛰기
+        if (!items.find(i => i.id === id)) {
+            items.push({
+                id: id,
+                name: name,
+                icon: icon,
+                originalOrder: index
+            });
+        }
+    };
+
+    let index = 0;
+    
+    // 직접 자식 수집
+    extensionsMenu.children().each(function() {
+        const $el = $(this);
+        
+        // 카테고리 wrapper 안의 항목들도 수집
+        if ($el.hasClass('menu-customizer-category-wrapper')) {
+            $el.find('.menu-customizer-category-content').children().each(function() {
+                collectFromElement($(this), index++);
+            });
+        } else {
+            collectFromElement($el, index++);
+        }
     });
 
     return items;
@@ -134,22 +156,22 @@ function syncMenuItems(menuType) {
     if (menuType === 'extensionMenu') {
         const currentItems = collectExtensionMenuItems();
         
-        // 새로운 항목 추가
+        // 새로운 항목 추가 (기존 설정 유지)
         currentItems.forEach(item => {
             const exists = settings.items.find(i => i.id === item.id);
             if (!exists) {
                 settings.items.push({
                     ...item,
                     hidden: false,
-                    categoryId: null
+                    categoryId: null,
+                    order: settings.items.length
                 });
             }
         });
         
-        // 더 이상 존재하지 않는 항목 제거
+        // 더 이상 존재하지 않는 항목 제거 (카테고리에 속한 항목도 유지)
         settings.items = settings.items.filter(item => 
-            currentItems.find(ci => ci.id === item.id) || 
-            settings.categories.some(cat => cat.items && cat.items.find(i => i.id === item.id))
+            currentItems.find(ci => ci.id === item.id)
         );
     }
     
@@ -226,14 +248,18 @@ function renderMenuContent(menuType) {
     const categories = settings.categories || [];
     const items = settings.items || [];
     
+    // 순서대로 정렬
+    const sortedItems = [...items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    
     // 카테고리에 속하지 않은 항목들
-    const uncategorizedItems = items.filter(item => !item.categoryId);
+    const uncategorizedItems = sortedItems.filter(item => !item.categoryId);
     
     let html = '<div class="menu-customizer-list" data-menu-type="' + menuType + '">';
     
-    // 카테고리들 렌더링
-    categories.forEach(category => {
-        const categoryItems = items.filter(item => item.categoryId === category.id);
+    // 카테고리들 렌더링 (카테고리 순서대로)
+    const sortedCategories = [...categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    sortedCategories.forEach(category => {
+        const categoryItems = sortedItems.filter(item => item.categoryId === category.id);
         html += renderCategory(category, categoryItems, menuType);
     });
     
@@ -537,14 +563,21 @@ function saveItemOrder(menuType) {
     // 새로운 순서 배열 생성
     const newOrder = [];
     let orderIndex = 0;
+    let categoryOrderIndex = 0;
     
     // 카테고리와 항목들의 순서를 수집
     $list.children().each(function() {
         const $el = $(this);
         
         if ($el.hasClass('menu-customizer-category')) {
-            // 카테고리 내의 항목들
+            // 카테고리 순서 업데이트
             const categoryId = $el.data('category-id');
+            const category = settings.categories.find(c => c.id === categoryId);
+            if (category) {
+                category.order = categoryOrderIndex++;
+            }
+            
+            // 카테고리 내의 항목들
             $el.find('.menu-customizer-item').each(function() {
                 const itemId = $(this).data('item-id');
                 newOrder.push({ id: itemId, order: orderIndex++, categoryId: categoryId });
@@ -566,7 +599,8 @@ function saveItemOrder(menuType) {
     });
     
     // 순서대로 정렬
-    settings.items.sort((a, b) => (a.order || 0) - (b.order || 0));
+    settings.items.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    settings.categories.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
     
     saveSettingsDebounced();
     
@@ -906,9 +940,13 @@ function applyChatMenuCustomizations(settings) {
         }
     });
     
-    // 카테고리 생성
-    settings.categories.forEach(category => {
-        const categoryItems = settings.items.filter(item => item.categoryId === category.id && !item.hidden);
+    // 순서대로 정렬
+    const sortedItems = [...settings.items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    const sortedCategories = [...settings.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    
+    // 카테고리 생성 (역순으로 prepend하므로 reverse)
+    [...sortedCategories].reverse().forEach(category => {
+        const categoryItems = sortedItems.filter(item => item.categoryId === category.id && !item.hidden);
         
         if (categoryItems.length === 0) return;
         
@@ -928,7 +966,7 @@ function applyChatMenuCustomizations(settings) {
         const $categoryWrapper = $(categoryHtml);
         $optionsContent.prepend($categoryWrapper);
         
-        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동)
+        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동, 순서대로)
         categoryItems.forEach(item => {
             const $menuItem = $(`#${item.id}`);
             if ($menuItem.length > 0) {
@@ -967,8 +1005,8 @@ function applyChatMenuCustomizations(settings) {
         });
     });
     
-    // 순서 재정렬 (카테고리에 속하지 않은 항목들)
-    const uncategorizedItems = settings.items.filter(item => !item.categoryId && !item.hidden);
+    // 순서 재정렬 (카테고리에 속하지 않은 항목들, 순서대로)
+    const uncategorizedItems = sortedItems.filter(item => !item.categoryId && !item.hidden);
     uncategorizedItems.forEach((item, index) => {
         const $menuItem = $(`#${item.id}`);
         if ($menuItem.length > 0 && !$menuItem.closest('.menu-customizer-category-wrapper').length) {
@@ -1010,9 +1048,13 @@ function applyExtensionMenuCustomizations(settings) {
         }
     });
     
-    // 카테고리 생성
-    settings.categories.forEach(category => {
-        const categoryItems = settings.items.filter(item => item.categoryId === category.id && !item.hidden);
+    // 순서대로 정렬
+    const sortedItems = [...settings.items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    const sortedCategories = [...settings.categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    
+    // 카테고리 생성 (역순으로 prepend하므로 reverse)
+    [...sortedCategories].reverse().forEach(category => {
+        const categoryItems = sortedItems.filter(item => item.categoryId === category.id && !item.hidden);
         
         if (categoryItems.length === 0) return;
         
@@ -1032,7 +1074,7 @@ function applyExtensionMenuCustomizations(settings) {
         const $categoryWrapper = $(categoryHtml);
         $extensionsMenu.prepend($categoryWrapper);
         
-        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동)
+        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동, 순서대로)
         categoryItems.forEach(item => {
             const $menuItem = $(`#${item.id}`);
             if ($menuItem.length > 0) {
