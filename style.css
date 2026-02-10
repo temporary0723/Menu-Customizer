@@ -734,8 +734,8 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.8);
     z-index: 10000;
     display: flex;
@@ -751,25 +751,87 @@
 }
 
 .menu-customizer-add-modal {
-    position: relative;
     background: var(--SmartThemeBlurTintColor, #1a1a2e);
     border: 1px solid var(--SmartThemeBorderColor, #3a3a5a);
     border-radius: 12px;
     width: 90%;
     max-width: 450px;
-    max-height: 70%;
-    margin: 20px;
+    max-height: 70vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-    transform: scale(0.9);
+    transform: scale(0.9) translateY(-20px);
     opacity: 0;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .menu-customizer-add-modal.visible {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
+}
+
+/* 추가 모달 반응형 - 태블릿 이하 */
+@media (max-width: 950px) {
+    .menu-customizer-add-modal-backdrop {
+        align-items: flex-start;
+        padding-top: 3vh;
+        padding-bottom: 3vh;
+    }
+    
+    .menu-customizer-add-modal {
+        width: 95vw;
+        max-width: none;
+        height: 60vh;
+        max-height: 60vh;
+        margin: 0 auto;
+        transform: scale(0.98);
+    }
+    
+    .menu-customizer-add-modal.visible {
+        transform: scale(1);
+    }
+    
+    .menu-customizer-add-modal-header,
+    .menu-customizer-add-modal-footer {
+        flex-shrink: 0;
+    }
+    
+    .menu-customizer-add-modal-body {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+}
+
+/* 추가 모달 반응형 - 스마트폰 */
+@media (max-width: 480px) {
+    .menu-customizer-add-modal-backdrop {
+        padding-top: 2vh;
+        padding-bottom: 2vh;
+    }
+    
+    .menu-customizer-add-modal {
+        width: 96vw;
+        height: 65vh;
+        max-height: 65vh;
+        border-radius: 10px;
+    }
+    
+    .menu-customizer-add-modal-header {
+        padding: 10px 14px;
+    }
+    
+    .menu-customizer-add-modal-header h4 {
+        font-size: 14px;
+    }
+    
+    .menu-customizer-add-modal-body {
+        padding: 12px;
+    }
+    
+    .menu-customizer-add-modal-footer {
+        padding: 10px 14px;
+    }
 }
 
 .menu-customizer-add-modal-header {
