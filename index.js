@@ -1055,21 +1055,35 @@ async function showAddItemsToCategoryModal(menuType, categoryId) {
     
     if (!category) return;
     
-    // 카테고리에 속하지 않은 항목들만 표시
-    const availableItems = settings.items.filter(item => item.categoryId !== categoryId);
+    // 현재 카테고리에 속한 항목 ID 목록 저장 (초기 상태)
+    const initialItemIds = settings.items
+        .filter(item => item.categoryId === categoryId)
+        .map(item => item.id);
     
-    if (availableItems.length === 0) {
-        toastr.info('추가할 수 있는 항목이 없습니다.');
-        return;
-    }
-    
-    const itemsHtml = availableItems.map(item => `
-        <label class="menu-customizer-add-item-option">
-            <input type="checkbox" value="${item.id}" data-item-id="${item.id}">
-            <i class="fa-solid ${item.icon || 'fa-question'}"></i>
-            <span>${item.name}</span>
-        </label>
-    `).join('');
+    // 전체 항목 표시
+    const itemsHtml = settings.items.map(item => {
+        const isInCurrentCategory = item.categoryId === categoryId;
+        const otherCategory = item.categoryId && item.categoryId !== categoryId 
+            ? settings.categories.find(c => c.id === item.categoryId)
+            : null;
+        const isDisabled = otherCategory !== null;
+        
+        let statusText = '';
+        if (otherCategory) {
+            statusText = `<span class="add-item-category-label">${otherCategory.name}</span>`;
+        }
+        
+        return `
+            <label class="menu-customizer-add-item-option ${isDisabled ? 'disabled' : ''}" ${isDisabled ? 'title="다른 카테고리에 속해 있습니다"' : ''}>
+                <input type="checkbox" value="${item.id}" data-item-id="${item.id}" 
+                    ${isInCurrentCategory ? 'checked' : ''} 
+                    ${isDisabled ? 'disabled' : ''}>
+                <i class="fa-solid ${item.icon || 'fa-question'}"></i>
+                <span class="add-item-name">${item.customName || item.name}</span>
+                ${statusText}
+            </label>
+        `;
+    }).join('');
     
     // 기존 추가 모달 제거
     $('.menu-customizer-add-modal-backdrop').remove();
@@ -1078,7 +1092,7 @@ async function showAddItemsToCategoryModal(menuType, categoryId) {
         <div class="menu-customizer-add-modal-backdrop">
             <div class="menu-customizer-add-modal">
                 <div class="menu-customizer-add-modal-header">
-                    <h4>"${category.name}" 카테고리에 추가할 항목 선택</h4>
+                    <h4><i class="fa-solid fa-folder-open"></i> "${category.name}" 항목 관리</h4>
                     <button class="menu-customizer-add-modal-close">×</button>
                 </div>
                 <div class="menu-customizer-add-modal-body">
@@ -1088,7 +1102,7 @@ async function showAddItemsToCategoryModal(menuType, categoryId) {
                 </div>
                 <div class="menu-customizer-add-modal-footer">
                     <button class="menu-customizer-add-modal-cancel">취소</button>
-                    <button class="menu-customizer-add-modal-confirm">추가</button>
+                    <button class="menu-customizer-add-modal-confirm">확인</button>
                 </div>
             </div>
         </div>
@@ -1112,37 +1126,58 @@ async function showAddItemsToCategoryModal(menuType, categoryId) {
         }, 300);
     };
     
-    // 이벤트 핸들러
+    // 닫기/취소 버튼
     $addModal.find('.menu-customizer-add-modal-close, .menu-customizer-add-modal-cancel').on('click', closeAddModal);
     
-    $addModal.find('.menu-customizer-add-modal-backdrop').on('click', function(e) {
-        if (e.target === this) {
+    // 배경 클릭으로 닫기
+    $addModal.on('click', function(e) {
+        if ($(e.target).hasClass('menu-customizer-add-modal-backdrop')) {
             closeAddModal();
         }
     });
     
-    // 확인 버튼
+    // 확인 버튼 - 변경사항 적용
     $addModal.find('.menu-customizer-add-modal-confirm').on('click', function() {
-        const selectedItems = [];
-        $addModal.find('.menu-customizer-add-item-option input:checked').each(function() {
-            selectedItems.push($(this).data('item-id'));
+        // 현재 체크된 항목 ID 목록
+        const checkedItemIds = [];
+        $addModal.find('.menu-customizer-add-item-option input:not(:disabled)').each(function() {
+            if ($(this).is(':checked')) {
+                checkedItemIds.push($(this).data('item-id'));
+            }
         });
         
-        if (selectedItems.length > 0) {
-            selectedItems.forEach(itemId => {
-                const item = settings.items.find(i => i.id === itemId);
-                if (item) {
-                    item.categoryId = categoryId;
-                }
-            });
+        let addedCount = 0;
+        let removedCount = 0;
+        
+        // 모든 항목 순회하며 카테고리 업데이트
+        settings.items.forEach(item => {
+            // 다른 카테고리에 속한 항목은 건너뛰기
+            if (item.categoryId && item.categoryId !== categoryId) return;
             
+            const wasInCategory = initialItemIds.includes(item.id);
+            const isNowChecked = checkedItemIds.includes(item.id);
+            
+            if (!wasInCategory && isNowChecked) {
+                // 새로 추가
+                item.categoryId = categoryId;
+                addedCount++;
+            } else if (wasInCategory && !isNowChecked) {
+                // 제거
+                item.categoryId = null;
+                removedCount++;
+            }
+        });
+        
+        // 변경사항이 있으면 저장
+        if (addedCount > 0 || removedCount > 0) {
             saveSettingsDebounced();
             refreshModalContent(menuType);
             applyMenuCustomizations(menuType);
             
-            toastr.success(`${selectedItems.length}개 항목이 카테고리에 추가되었습니다.`);
-        } else {
-            toastr.info('선택된 항목이 없습니다.');
+            const messages = [];
+            if (addedCount > 0) messages.push(`${addedCount}개 추가`);
+            if (removedCount > 0) messages.push(`${removedCount}개 제거`);
+            toastr.success(`항목이 업데이트되었습니다. (${messages.join(', ')})`);
         }
         
         closeAddModal();

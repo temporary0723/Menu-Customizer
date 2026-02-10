@@ -521,7 +521,7 @@
     transition: all 0.2s;
 }
 
-.menu-customizer-add-item-option:hover {
+.menu-customizer-add-item-option:hover:not(.disabled) {
     background: rgba(255, 255, 255, 0.1);
     border-color: var(--SmartThemeQuoteColor, #7c7cff);
 }
@@ -529,15 +529,59 @@
 .menu-customizer-add-item-option input {
     width: 18px;
     height: 18px;
+    flex-shrink: 0;
     accent-color: var(--SmartThemeQuoteColor, #7c7cff);
 }
 
 .menu-customizer-add-item-option i {
     color: var(--SmartThemeQuoteColor, #7c7cff);
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
 }
 
-.menu-customizer-add-item-option span {
+.menu-customizer-add-item-option .add-item-name {
     color: var(--SmartThemeBodyColor, #e0e0e0);
+    flex: 1;
+}
+
+/* 비활성화된 항목 (다른 카테고리에 속함) */
+.menu-customizer-add-item-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(100, 100, 100, 0.1);
+}
+
+.menu-customizer-add-item-option.disabled input {
+    cursor: not-allowed;
+}
+
+.menu-customizer-add-item-option.disabled:hover {
+    background: rgba(100, 100, 100, 0.1);
+    border-color: var(--SmartThemeBorderColor, #3a3a5a);
+}
+
+/* 카테고리 라벨 */
+.add-item-category-label {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: rgba(124, 124, 255, 0.2);
+    border: 1px solid rgba(124, 124, 255, 0.4);
+    border-radius: 10px;
+    color: var(--SmartThemeQuoteColor, #7c7cff);
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+/* 체크된 항목 강조 */
+.menu-customizer-add-item-option:has(input:checked):not(.disabled) {
+    background: rgba(124, 124, 255, 0.15);
+    border-color: var(--SmartThemeQuoteColor, #7c7cff);
+}
+
+.menu-customizer-add-item-option:has(input:checked):not(.disabled) .add-item-name {
+    color: var(--SmartThemeQuoteColor, #7c7cff);
+    font-weight: 500;
 }
 
 /* ===== 실제 메뉴 카테고리 스타일 (채팅 메뉴) ===== */
