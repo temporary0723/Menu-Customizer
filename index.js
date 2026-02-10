@@ -93,75 +93,82 @@ function collectExtensionMenuItems() {
     
     if (extensionsMenu.length === 0) return items;
 
-    // 메뉴 커스터마이저 버튼 ID
-    const myButtonId = 'menu_customizer_button';
+    // 고유 ID 생성용 카운터
+    let noIdCounter = 0;
 
     // 직접 자식과 카테고리 안의 항목들 모두 수집
     const collectFromElement = ($el, index) => {
-        const id = $el.attr('id');
-        
-        // ID가 없거나 빈 요소는 건너뛰기
-        if (!id || $el.is('hr')) return;
-        
-        // 메뉴 커스터마이저 버튼 제외
-        if (id === myButtonId) return;
+        // 빈 요소나 hr은 건너뛰기
+        if ($el.is('hr') || $el.children().length === 0) return;
         
         // 커스텀 카테고리 wrapper 제외
         if ($el.hasClass('menu-customizer-category-wrapper')) return;
         
-        // extension_container 클래스인 경우, 내부의 실제 버튼만 수집
-        if ($el.hasClass('extension_container')) {
-            // 컨테이너 안의 클릭 가능한 자식 요소 수집
-            $el.children().each(function() {
-                const $child = $(this);
-                const childId = $child.attr('id');
-                
-                if (!childId) return;
-                if (childId === myButtonId) return;
-                
-                // 실제로 보이는 요소만
-                if ($child.css('display') === 'none' && !$child.hasClass('menu-customizer-hidden')) return;
-                
-                // 클릭 가능한 요소인지 확인
-                const hasButton = $child.find('.extensionsMenuExtensionButton').length > 0 ||
-                                 $child.hasClass('interactable') ||
-                                 $child.hasClass('list-group-item');
-                
-                if (!hasButton) return;
-                
-                let name = $child.find('span').text().trim() || $child.text().trim();
-                if (!name || name.length === 0) return;
-                
-                // 아이콘 추출
-                const iconEl = $child.find('i').first();
-                let icon = '';
-                if (iconEl.length > 0) {
-                    const classes = iconEl.attr('class') || '';
-                    const iconMatch = classes.match(/fa-[\w-]+/g);
-                    if (iconMatch) {
-                        icon = iconMatch.filter(c => c !== 'fa-lg' && !c.includes('extensionsMenu')).join(' ');
-                    }
-                }
-                
-                if (!items.find(i => i.id === childId)) {
-                    items.push({
-                        id: childId,
-                        name: name,
-                        icon: icon,
-                        originalOrder: index++
-                    });
-                }
-            });
-            return;
-        }
-        
         // 실제로 보이는 요소만 (menu-customizer-hidden은 우리가 숨긴 것이므로 포함)
         if ($el.css('display') === 'none' && !$el.hasClass('menu-customizer-hidden')) return;
+        
+        let id = $el.attr('id');
+        
+        // extension_container 클래스 처리
+        if ($el.hasClass('extension_container')) {
+            // extension_container이면서 interactable인 경우, 내부 자식들을 수집
+            const $children = $el.children();
+            
+            if ($children.length > 0) {
+                $children.each(function() {
+                    const $child = $(this);
+                    let childId = $child.attr('id');
+                    
+                    // 보이지 않는 요소 제외
+                    if ($child.css('display') === 'none' && !$child.hasClass('menu-customizer-hidden')) return;
+                    
+                    // 클릭 가능한 요소인지 확인
+                    const isClickable = $child.find('.extensionsMenuExtensionButton').length > 0 ||
+                                       $child.hasClass('interactable') ||
+                                       $child.hasClass('list-group-item') ||
+                                       $child.is('a') ||
+                                       $child.is('div');
+                    
+                    if (!isClickable) return;
+                    
+                    let name = $child.find('span').text().trim() || $child.text().trim();
+                    if (!name || name.length === 0) return;
+                    
+                    // ID가 없으면 생성
+                    if (!childId) {
+                        childId = `menu_customizer_auto_${noIdCounter++}`;
+                        $child.attr('id', childId);
+                    }
+                    
+                    // 아이콘 추출
+                    const iconEl = $child.find('i').first();
+                    let icon = '';
+                    if (iconEl.length > 0) {
+                        const classes = iconEl.attr('class') || '';
+                        const iconMatch = classes.match(/fa-[\w-]+/g);
+                        if (iconMatch) {
+                            icon = iconMatch.filter(c => c !== 'fa-lg' && !c.includes('extensionsMenu')).join(' ');
+                        }
+                    }
+                    
+                    if (!items.find(i => i.id === childId)) {
+                        items.push({
+                            id: childId,
+                            name: name,
+                            icon: icon,
+                            originalOrder: index++
+                        });
+                    }
+                });
+            }
+            return;
+        }
         
         // 클릭 가능한 메뉴 항목인지 확인
         const hasButton = $el.find('.extensionsMenuExtensionButton').length > 0 ||
                          $el.hasClass('interactable') ||
-                         $el.hasClass('list-group-item');
+                         $el.hasClass('list-group-item') ||
+                         $el.is('a');
         
         if (!hasButton) return;
         
@@ -170,6 +177,12 @@ function collectExtensionMenuItems() {
         
         // 이름이 없으면 제외
         if (!name || name.length === 0) return;
+        
+        // ID가 없으면 생성
+        if (!id) {
+            id = `menu_customizer_auto_${noIdCounter++}`;
+            $el.attr('id', id);
+        }
         
         // 아이콘 클래스 추출
         const iconElement = $el.find('i').first();
