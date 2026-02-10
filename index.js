@@ -565,13 +565,15 @@ function setupDragAndDrop() {
     
     let $placeholder = null;
     let autoScrollInterval = null;
-    const SCROLL_ZONE = 60; // 스크롤 영역 (상단/하단에서 60px)
-    const SCROLL_SPEED = 10; // 스크롤 속도
+    let lastPlaceholderIndex = -1; // 플레이스홀더 위치 캐시
+    const SCROLL_ZONE = 60;
+    const SCROLL_SPEED = 10;
     
     // 플레이스홀더 생성
     function createPlaceholder() {
         if ($placeholder) $placeholder.remove();
         $placeholder = $('<div class="menu-customizer-placeholder"></div>');
+        lastPlaceholderIndex = -1;
         return $placeholder;
     }
     
@@ -581,128 +583,21 @@ function setupDragAndDrop() {
             $placeholder.remove();
             $placeholder = null;
         }
+        lastPlaceholderIndex = -1;
     }
     
-    // 자동 스크롤 시작
-    function startAutoScroll($scrollContainer, direction) {
-        if (autoScrollInterval) return; // 이미 스크롤 중이면 무시
+    // 자동 스크롤
+    function startAutoScroll($container, direction) {
+        if (autoScrollInterval) return;
         autoScrollInterval = setInterval(() => {
-            const currentScroll = $scrollContainer.scrollTop();
-            $scrollContainer.scrollTop(currentScroll + (direction * SCROLL_SPEED));
+            $container.scrollTop($container.scrollTop() + direction * SCROLL_SPEED);
         }, 16);
     }
     
-    // 자동 스크롤 중지
     function stopAutoScroll() {
         if (autoScrollInterval) {
             clearInterval(autoScrollInterval);
             autoScrollInterval = null;
-        }
-    }
-    
-    // 마우스 Y 위치에서 가장 가까운 삽입 지점 찾기
-    function findInsertPoint(mouseY, $container) {
-        const $children = $container.children('.menu-customizer-item, .menu-customizer-category').not(draggedItem).not($placeholder);
-        
-        if ($children.length === 0) {
-            return { target: null, position: 'append', container: $container };
-        }
-        
-        let bestTarget = null;
-        let bestPosition = 'after';
-        let minDistance = Infinity;
-        
-        $children.each(function() {
-            const rect = this.getBoundingClientRect();
-            const topDistance = Math.abs(mouseY - rect.top);
-            const bottomDistance = Math.abs(mouseY - rect.bottom);
-            
-            if (topDistance < minDistance) {
-                minDistance = topDistance;
-                bestTarget = $(this);
-                bestPosition = 'before';
-            }
-            if (bottomDistance < minDistance) {
-                minDistance = bottomDistance;
-                bestTarget = $(this);
-                bestPosition = 'after';
-            }
-        });
-        
-        return { target: bestTarget, position: bestPosition, container: $container };
-    }
-    
-    // 플레이스홀더 위치 업데이트
-    function updatePlaceholderPosition(mouseY) {
-        if (!$placeholder || !draggedItem) return;
-        
-        // 현재 마우스 위치의 요소 찾기 (플레이스홀더 숨기고 찾기)
-        $placeholder.hide();
-        const elemBelow = document.elementFromPoint(
-            currentModal.find('.menu-customizer-body').offset().left + 100,
-            mouseY
-        );
-        $placeholder.show();
-        
-        if (!elemBelow) return;
-        
-        const $elemBelow = $(elemBelow);
-        
-        // 대상 컨테이너 찾기
-        let $targetContainer = null;
-        let insertInfo = null;
-        
-        // 항목 위에 있는 경우
-        const $targetItem = $elemBelow.closest('.menu-customizer-item').not(draggedItem);
-        if ($targetItem.length) {
-            const rect = $targetItem[0].getBoundingClientRect();
-            const middle = rect.top + rect.height / 2;
-            const position = mouseY < middle ? 'before' : 'after';
-            
-            if (position === 'before') {
-                $targetItem.before($placeholder);
-            } else {
-                $targetItem.after($placeholder);
-            }
-            return;
-        }
-        
-        // 카테고리 항목 영역 위에 있는 경우
-        const $categoryItems = $elemBelow.closest('.menu-customizer-category-items');
-        if ($categoryItems.length) {
-            insertInfo = findInsertPoint(mouseY, $categoryItems);
-            $targetContainer = $categoryItems;
-        }
-        
-        // 카테고리 헤더 위에 있는 경우
-        const $categoryHeader = $elemBelow.closest('.menu-customizer-category-header');
-        if ($categoryHeader.length) {
-            const $category = $categoryHeader.closest('.menu-customizer-category');
-            const $categoryItemsInner = $category.find('.menu-customizer-category-items');
-            if ($categoryItemsInner.length) {
-                $categoryItemsInner.prepend($placeholder);
-                return;
-            }
-        }
-        
-        // 메인 리스트 위에 있는 경우
-        const $list = $elemBelow.closest('.menu-customizer-list');
-        if ($list.length && !$targetContainer) {
-            insertInfo = findInsertPoint(mouseY, $list);
-            $targetContainer = $list;
-        }
-        
-        // 플레이스홀더 배치
-        if (insertInfo && $targetContainer) {
-            if (insertInfo.target) {
-                if (insertInfo.position === 'before') {
-                    insertInfo.target.before($placeholder);
-                } else {
-                    insertInfo.target.after($placeholder);
-                }
-            } else {
-                $targetContainer.append($placeholder);
-            }
         }
     }
 
@@ -714,28 +609,74 @@ function setupDragAndDrop() {
         e.originalEvent.dataTransfer.effectAllowed = 'move';
         e.originalEvent.dataTransfer.setData('text/plain', '');
         
-        // 플레이스홀더 생성 후 드래그 항목 바로 뒤에 배치
         createPlaceholder();
         draggedItem.after($placeholder);
         
-        // 약간의 지연 후 dragging 클래스 추가
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             draggedItem.addClass('dragging');
-        }, 0);
+        });
     });
 
-    // 드래그 중 - body 레벨에서 처리
-    currentModal.find('.menu-customizer-body').on('dragover', function(e) {
+    // 드래그 중 - 개별 항목
+    currentModal.on('dragover', '.menu-customizer-item', function(e) {
         e.preventDefault();
-        e.originalEvent.dataTransfer.dropEffect = 'move';
+        if (!draggedItem || !$placeholder || $(this).is(draggedItem)) return;
         
+        const $target = $(this);
+        const rect = this.getBoundingClientRect();
+        const mouseY = e.originalEvent.clientY;
+        const middle = rect.top + rect.height / 2;
+        
+        if (mouseY < middle) {
+            if (!$placeholder.next().is($target)) {
+                $target.before($placeholder);
+            }
+        } else {
+            if (!$placeholder.prev().is($target)) {
+                $target.after($placeholder);
+            }
+        }
+    });
+    
+    // 드래그 중 - 카테고리 헤더
+    currentModal.on('dragover', '.menu-customizer-category-header', function(e) {
+        e.preventDefault();
         if (!draggedItem || !$placeholder) return;
         
-        const mouseY = e.originalEvent.clientY;
-        const $scrollContainer = $(this);
+        const $category = $(this).closest('.menu-customizer-category');
+        const $categoryItems = $category.find('.menu-customizer-category-items');
         
-        // 자동 스크롤 처리
-        const containerRect = this.getBoundingClientRect();
+        if ($categoryItems.length && !$placeholder.parent().is($categoryItems)) {
+            $categoryItems.prepend($placeholder);
+        }
+    });
+    
+    // 드래그 중 - 카테고리 항목 영역 (빈 영역)
+    currentModal.on('dragover', '.menu-customizer-category-items', function(e) {
+        e.preventDefault();
+        if (!draggedItem || !$placeholder) return;
+        
+        const $container = $(this);
+        const $items = $container.children('.menu-customizer-item').not(draggedItem);
+        
+        // 빈 카테고리면 그냥 추가
+        if ($items.length === 0 && !$placeholder.parent().is($container)) {
+            $container.append($placeholder);
+        }
+    });
+    
+    // 드래그 중 - 메인 리스트 (빈 영역)
+    currentModal.on('dragover', '.menu-customizer-list', function(e) {
+        e.preventDefault();
+        if (!draggedItem || !$placeholder) return;
+        
+        const $container = $(this);
+        const mouseY = e.originalEvent.clientY;
+        
+        // 자동 스크롤
+        const $scrollContainer = currentModal.find('.menu-customizer-body');
+        const containerRect = $scrollContainer[0].getBoundingClientRect();
+        
         if (mouseY < containerRect.top + SCROLL_ZONE) {
             startAutoScroll($scrollContainer, -1);
         } else if (mouseY > containerRect.bottom - SCROLL_ZONE) {
@@ -744,13 +685,17 @@ function setupDragAndDrop() {
             stopAutoScroll();
         }
         
-        // 플레이스홀더 위치 업데이트
-        updatePlaceholderPosition(mouseY);
+        // 빈 리스트면 그냥 추가
+        const $items = $container.children('.menu-customizer-item, .menu-customizer-category').not(draggedItem);
+        if ($items.length === 0 && !$placeholder.parent().is($container)) {
+            $container.append($placeholder);
+        }
     });
 
     // 드롭
-    currentModal.find('.menu-customizer-body').on('drop', function(e) {
+    currentModal.on('drop', '.menu-customizer-item, .menu-customizer-category, .menu-customizer-category-items, .menu-customizer-list, .menu-customizer-body', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         stopAutoScroll();
         
@@ -761,22 +706,18 @@ function setupDragAndDrop() {
         
         const menuType = draggedItem.data('menu-type');
         
-        // 플레이스홀더 위치에 항목 삽입
         if ($placeholder.parent().length) {
             const $targetContainer = $placeholder.parent();
             
             $placeholder.replaceWith(draggedItem);
             draggedItem.removeClass('dragging');
             
-            // 카테고리 업데이트
             if ($targetContainer.hasClass('menu-customizer-category-items')) {
-                const newCategoryId = $targetContainer.data('category-id');
-                updateItemCategory(menuType, draggedItem.data('item-id'), newCategoryId);
+                updateItemCategory(menuType, draggedItem.data('item-id'), $targetContainer.data('category-id'));
             } else if ($targetContainer.hasClass('menu-customizer-list')) {
                 updateItemCategory(menuType, draggedItem.data('item-id'), null);
             }
             
-            // 순서 저장
             saveItemOrder(menuType);
         }
         
@@ -794,12 +735,9 @@ function setupDragAndDrop() {
         draggedFrom = null;
     });
     
-    // ===== 모바일 지원 =====
-    
-    // 컨텍스트 메뉴 방지 (모바일 롱프레스 메뉴)
+    // 모바일 컨텍스트 메뉴 방지
     currentModal.on('contextmenu', '.menu-customizer-item, .menu-customizer-item-drag, .menu-customizer-list', function(e) {
         e.preventDefault();
-        e.stopPropagation();
         return false;
     });
 }
