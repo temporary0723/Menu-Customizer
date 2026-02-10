@@ -1325,16 +1325,10 @@ function applyChatMenuCustomizations(settings) {
         ...settings.categories.map(cat => ({ ...cat, elementType: 'category' }))
     ].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
     
-    const sortedItems = [...settings.items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
-    
-    // 카테고리 생성 (역순으로 prepend하므로 reverse)
-    [...sortedCategories].reverse().forEach(category => {
-        const categoryItems = sortedItems.filter(item => item.categoryId === category.id && !item.hidden);
-        
-        if (categoryItems.length === 0) return;
-        
+    // 카테고리 wrapper 미리 생성
+    const categoryWrappers = {};
+    settings.categories.forEach(category => {
         const isExpanded = category.expanded !== false;
-        
         const categoryHtml = `
             <div class="menu-customizer-category-wrapper" data-category-id="${category.id}">
                 <a class="menu-customizer-category-toggle-btn ${isExpanded ? 'expanded' : ''}">
@@ -1345,17 +1339,8 @@ function applyChatMenuCustomizations(settings) {
                 <div class="menu-customizer-category-content ${isExpanded ? 'expanded' : ''}"></div>
             </div>
         `;
-        
         const $categoryWrapper = $(categoryHtml);
-        $optionsContent.prepend($categoryWrapper);
-        
-        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동, 순서대로)
-        categoryItems.forEach(item => {
-            const $menuItem = $(`#${item.id}`);
-            if ($menuItem.length > 0) {
-                $categoryWrapper.find('.menu-customizer-category-content').append($menuItem);
-            }
-        });
+        categoryWrappers[category.id] = $categoryWrapper;
         
         // 카테고리 토글 이벤트
         $categoryWrapper.find('.menu-customizer-category-toggle-btn').on('click', function(e) {
@@ -1364,7 +1349,7 @@ function applyChatMenuCustomizations(settings) {
             
             const $wrapper = $(this).closest('.menu-customizer-category-wrapper');
             const $content = $wrapper.find('.menu-customizer-category-content');
-            const categoryId = $wrapper.data('category-id');
+            const catId = $wrapper.data('category-id');
             const isCurrentlyExpanded = $(this).hasClass('expanded');
             
             if (isCurrentlyExpanded) {
@@ -1380,7 +1365,7 @@ function applyChatMenuCustomizations(settings) {
             }
             
             // 설정 저장
-            const categoryData = settings.categories.find(c => c.id === categoryId);
+            const categoryData = settings.categories.find(c => c.id === catId);
             if (categoryData) {
                 categoryData.expanded = !isCurrentlyExpanded;
                 saveSettingsDebounced();
@@ -1388,17 +1373,38 @@ function applyChatMenuCustomizations(settings) {
         });
     });
     
-    // 순서 재정렬 (카테고리에 속하지 않은 항목들과 구분선, 순서대로)
-    const uncategorizedElements = allElements.filter(el => !el.categoryId && (el.elementType === 'item' ? !el.hidden : true) && el.elementType !== 'category');
-    uncategorizedElements.forEach((element) => {
-        if (element.elementType === 'item') {
+    // 순서대로 모든 요소 배치
+    allElements.forEach(element => {
+        if (element.elementType === 'category') {
+            // 카테고리 배치
+            const $categoryWrapper = categoryWrappers[element.id];
+            if ($categoryWrapper) {
+                $optionsContent.append($categoryWrapper);
+            }
+        } else if (element.elementType === 'item') {
+            // 항목 배치
+            if (element.hidden) return;
+            
             const $menuItem = $(`#${element.id}`);
-            if ($menuItem.length > 0 && !$menuItem.closest('.menu-customizer-category-wrapper').length) {
-                $optionsContent.append($menuItem);
+            if ($menuItem.length > 0) {
+                if (element.categoryId && categoryWrappers[element.categoryId]) {
+                    // 카테고리에 속한 항목
+                    categoryWrappers[element.categoryId].find('.menu-customizer-category-content').append($menuItem);
+                } else {
+                    // 카테고리에 속하지 않은 항목
+                    $optionsContent.append($menuItem);
+                }
             }
         } else if (element.elementType === 'separator') {
+            // 구분선 배치
             const $separator = $(`<hr class="menu-customizer-separator-hr" data-separator-id="${element.id}">`);
-            $optionsContent.append($separator);
+            if (element.categoryId && categoryWrappers[element.categoryId]) {
+                // 카테고리에 속한 구분선
+                categoryWrappers[element.categoryId].find('.menu-customizer-category-content').append($separator);
+            } else {
+                // 카테고리에 속하지 않은 구분선
+                $optionsContent.append($separator);
+            }
         }
     });
 }
@@ -1456,16 +1462,10 @@ function applyExtensionMenuCustomizations(settings) {
         ...settings.categories.map(cat => ({ ...cat, elementType: 'category' }))
     ].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
     
-    const sortedItems = [...settings.items].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
-    
-    // 카테고리 생성 (역순으로 prepend하므로 reverse)
-    [...sortedCategories].reverse().forEach(category => {
-        const categoryItems = sortedItems.filter(item => item.categoryId === category.id && !item.hidden);
-        
-        if (categoryItems.length === 0) return;
-        
+    // 카테고리 wrapper 미리 생성
+    const categoryWrappers = {};
+    settings.categories.forEach(category => {
         const isExpanded = category.expanded !== false;
-        
         const categoryHtml = `
             <div class="menu-customizer-category-wrapper extension_container" data-category-id="${category.id}">
                 <div class="menu-customizer-category-toggle-btn list-group-item flex-container flexGap5 interactable ${isExpanded ? 'expanded' : ''}">
@@ -1476,17 +1476,8 @@ function applyExtensionMenuCustomizations(settings) {
                 <div class="menu-customizer-category-content ${isExpanded ? 'expanded' : ''}"></div>
             </div>
         `;
-        
         const $categoryWrapper = $(categoryHtml);
-        $extensionsMenu.prepend($categoryWrapper);
-        
-        // 카테고리에 속한 항목들을 카테고리 내부로 이동 (원본 요소 이동, 순서대로)
-        categoryItems.forEach(item => {
-            const $menuItem = $(`#${item.id}`);
-            if ($menuItem.length > 0) {
-                $categoryWrapper.find('.menu-customizer-category-content').append($menuItem);
-            }
-        });
+        categoryWrappers[category.id] = $categoryWrapper;
         
         // 카테고리 토글 이벤트
         $categoryWrapper.find('.menu-customizer-category-toggle-btn').on('click', function(e) {
@@ -1495,7 +1486,7 @@ function applyExtensionMenuCustomizations(settings) {
             
             const $wrapper = $(this).closest('.menu-customizer-category-wrapper');
             const $content = $wrapper.find('.menu-customizer-category-content');
-            const categoryId = $wrapper.data('category-id');
+            const catId = $wrapper.data('category-id');
             const isCurrentlyExpanded = $(this).hasClass('expanded');
             
             if (isCurrentlyExpanded) {
@@ -1511,7 +1502,7 @@ function applyExtensionMenuCustomizations(settings) {
             }
             
             // 설정 저장
-            const categoryData = settings.categories.find(c => c.id === categoryId);
+            const categoryData = settings.categories.find(c => c.id === catId);
             if (categoryData) {
                 categoryData.expanded = !isCurrentlyExpanded;
                 saveSettingsDebounced();
@@ -1519,17 +1510,38 @@ function applyExtensionMenuCustomizations(settings) {
         });
     });
     
-    // 순서 재정렬 (카테고리에 속하지 않은 항목들과 구분선, 순서대로)
-    const uncategorizedElements = allElements.filter(el => !el.categoryId && (el.elementType === 'item' ? !el.hidden : true) && el.elementType !== 'category');
-    uncategorizedElements.forEach((element) => {
-        if (element.elementType === 'item') {
+    // 순서대로 모든 요소 배치
+    allElements.forEach(element => {
+        if (element.elementType === 'category') {
+            // 카테고리 배치
+            const $categoryWrapper = categoryWrappers[element.id];
+            if ($categoryWrapper) {
+                $extensionsMenu.append($categoryWrapper);
+            }
+        } else if (element.elementType === 'item') {
+            // 항목 배치
+            if (element.hidden) return;
+            
             const $menuItem = $(`#${element.id}`);
-            if ($menuItem.length > 0 && !$menuItem.closest('.menu-customizer-category-wrapper').length) {
-                $extensionsMenu.append($menuItem);
+            if ($menuItem.length > 0) {
+                if (element.categoryId && categoryWrappers[element.categoryId]) {
+                    // 카테고리에 속한 항목
+                    categoryWrappers[element.categoryId].find('.menu-customizer-category-content').append($menuItem);
+                } else {
+                    // 카테고리에 속하지 않은 항목
+                    $extensionsMenu.append($menuItem);
+                }
             }
         } else if (element.elementType === 'separator') {
+            // 구분선 배치
             const $separator = $(`<hr class="menu-customizer-separator-hr" data-separator-id="${element.id}">`);
-            $extensionsMenu.append($separator);
+            if (element.categoryId && categoryWrappers[element.categoryId]) {
+                // 카테고리에 속한 구분선
+                categoryWrappers[element.categoryId].find('.menu-customizer-category-content').append($separator);
+            } else {
+                // 카테고리에 속하지 않은 구분선
+                $extensionsMenu.append($separator);
+            }
         }
     });
 }
