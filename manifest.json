@@ -1,0 +1,12 @@
+{
+    "display_name": "메뉴 커스텀",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Menu Customizer Extension",
+    "version": "1.0.0",
+    "homePage": ""
+}
+
