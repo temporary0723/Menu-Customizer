@@ -608,7 +608,7 @@ async function addNewCategory(menuType) {
         const newCategory = {
             id: uuidv4(),
             name: result.trim(),
-            expanded: true,
+            expanded: false,
             order: settings.categories.length
         };
         
