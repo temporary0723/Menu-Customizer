@@ -961,10 +961,9 @@
         max-width: none;
         max-height: none;
         height: auto;
-        min-height: 0;
-        position: relative;
+        min-height: auto;
         margin: 0 auto;
-        flex-shrink: 0;
+        position: relative;
     }
     
     .menu-customizer-modal.visible {
@@ -984,7 +983,7 @@
     }
 }
 
-/* 중간 크기 화면 (768px 이하) */
+/* 중간 화면 (768px 이하) */
 @media (max-width: 768px) {
     .menu-customizer-modal-backdrop {
         padding-top: 2vh;
@@ -1005,7 +1004,7 @@
     }
     
     .menu-customizer-tab {
-        padding: 10px 16px;
+        padding: 8px 14px;
         font-size: 13px;
     }
     
@@ -1018,13 +1017,13 @@
     }
     
     .menu-customizer-footer {
-        padding: 12px 16px;
+        padding: 12px 14px;
+        flex-direction: column;
         gap: 8px;
     }
     
     .menu-customizer-footer button {
-        padding: 10px 14px;
-        font-size: 12px;
+        width: 100%;
     }
 }
 
@@ -1038,6 +1037,11 @@
     .menu-customizer-modal {
         width: 98vw;
         border-radius: 8px;
+    }
+    
+    .menu-customizer-body {
+        max-height: 50vh;
+        padding: 10px;
     }
     
     .menu-customizer-header {
@@ -1054,23 +1058,22 @@
         padding: 0 4px;
     }
     
-    .menu-customizer-body {
-        max-height: 50vh;
-        padding: 12px;
-    }
-    
     .menu-customizer-tabs {
-        padding: 8px 12px;
+        padding: 8px 10px;
     }
     
     .menu-customizer-tab {
-        padding: 8px 12px;
+        padding: 6px 10px;
         font-size: 12px;
     }
     
     .menu-customizer-item {
         padding: 8px 10px;
         gap: 8px;
+    }
+    
+    .menu-customizer-item-drag {
+        width: 16px;
     }
     
     .menu-customizer-item-icon {
@@ -1080,6 +1083,10 @@
     
     .menu-customizer-item-name {
         font-size: 12px;
+    }
+    
+    .menu-customizer-item-actions {
+        gap: 4px;
     }
     
     .menu-customizer-item-edit,
@@ -1097,22 +1104,21 @@
     
     .menu-customizer-footer {
         padding: 10px 12px;
-        flex-direction: column;
     }
     
     .menu-customizer-footer button {
-        width: 100%;
-        padding: 12px;
+        padding: 10px 14px;
+        font-size: 12px;
     }
     
-    /* 이름 수정 모달 반응형 */
+    /* 이름 수정 모달도 반응형 */
     .menu-customizer-edit-name-modal {
         width: 95vw;
         max-width: none;
     }
     
     .edit-name-header {
-        padding: 12px 14px;
+        padding: 10px 14px;
     }
     
     .edit-name-body {
@@ -1120,12 +1126,12 @@
     }
     
     .edit-name-footer {
-        padding: 12px 14px;
-        flex-direction: column;
+        padding: 10px 14px;
     }
     
     .edit-name-footer button {
-        width: 100%;
+        padding: 6px 12px;
+        font-size: 12px;
     }
 }
 
