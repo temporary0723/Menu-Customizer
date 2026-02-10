@@ -396,11 +396,14 @@ function renderCategory(category, items, menuType) {
  */
 function renderMenuItem(item, menuType, isInCategory = false) {
     const isHidden = item.hidden === true;
+    const displayName = item.customName || item.name;
+    const hasCustomName = item.customName && item.customName !== item.name;
     
     return `
         <div class="menu-customizer-item ${isHidden ? 'hidden-item' : ''} ${isInCategory ? 'in-category' : ''}" 
              data-item-id="${item.id}" 
              data-menu-type="${menuType}"
+             data-original-name="${item.name}"
              draggable="true">
             <div class="menu-customizer-item-drag">
                 <i class="fa-solid fa-grip-vertical"></i>
@@ -408,11 +411,14 @@ function renderMenuItem(item, menuType, isInCategory = false) {
             <div class="menu-customizer-item-icon">
                 <i class="fa-solid ${item.icon || 'fa-question'}"></i>
             </div>
-            <div class="menu-customizer-item-name">${item.name}</div>
+            <div class="menu-customizer-item-name ${hasCustomName ? 'custom-name' : ''}">${displayName}</div>
             <div class="menu-customizer-item-actions">
-                <label class="menu-customizer-item-visibility" title="${isHidden ? '숨김 해제' : '숨기기'}">
+                <button class="menu-customizer-item-edit" title="이름 수정">
+                    <i class="fa-solid fa-pencil"></i>
+                </button>
+                <label class="menu-customizer-item-visibility" title="${isHidden ? '표시' : '숨기기'}">
                     <input type="checkbox" ${!isHidden ? 'checked' : ''}>
-                    <i class="fa-solid ${isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                    <i class="fa-solid ${isHidden ? 'fa-toggle-off' : 'fa-toggle-on'}"></i>
                 </label>
             </div>
         </div>
@@ -519,11 +525,20 @@ function bindModalEventHandlers() {
         // UI 업데이트
         if (isVisible) {
             item.removeClass('hidden-item');
-            item.find('.menu-customizer-item-visibility i').removeClass('fa-eye-slash').addClass('fa-eye');
+            item.find('.menu-customizer-item-visibility i').removeClass('fa-toggle-off').addClass('fa-toggle-on');
         } else {
             item.addClass('hidden-item');
-            item.find('.menu-customizer-item-visibility i').removeClass('fa-eye').addClass('fa-eye-slash');
+            item.find('.menu-customizer-item-visibility i').removeClass('fa-toggle-on').addClass('fa-toggle-off');
         }
+    });
+
+    // 항목 이름 수정
+    currentModal.on('click', '.menu-customizer-item-edit', function(e) {
+        e.stopPropagation();
+        const item = $(this).closest('.menu-customizer-item');
+        const itemId = item.data('item-id');
+        const menuType = item.data('menu-type');
+        editItemName(menuType, itemId);
     });
 
     // 새 카테고리 추가
@@ -697,6 +712,70 @@ function toggleItemVisibility(menuType, itemId, hidden) {
         item.hidden = hidden;
         saveSettingsDebounced();
         applyMenuCustomizations(menuType);
+    }
+}
+
+/**
+ * 항목 이름 수정
+ */
+async function editItemName(menuType, itemId) {
+    const settings = extension_settings[pluginName][menuType];
+    const item = settings.items.find(i => i.id === itemId);
+    
+    if (!item) return;
+    
+    const originalName = item.name;
+    const currentName = item.customName || item.name;
+    
+    // 커스텀 모달 생성
+    const modalHtml = `
+        <div class="menu-customizer-edit-name-modal">
+            <p>메뉴 항목 이름 수정</p>
+            <div class="edit-name-input-container">
+                <input type="text" class="edit-name-input text_pole" value="${currentName}" placeholder="새 이름 입력">
+            </div>
+            <div class="edit-name-original">
+                <span>원본 이름: </span>
+                <strong class="original-name-text">${originalName}</strong>
+                <button type="button" class="edit-name-restore menu_button" title="원본 이름으로 복원">
+                    <i class="fa-solid fa-rotate-left"></i> 복원
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // 복원 버튼 이벤트 바인딩 (팝업 렌더링 후)
+    setTimeout(() => {
+        $('.edit-name-restore').off('click').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('.edit-name-input').val(originalName);
+            toastr.info('원본 이름으로 복원되었습니다. 확인을 눌러 저장하세요.');
+        });
+    }, 100);
+    
+    const result = await callGenericPopup(
+        modalHtml,
+        POPUP_TYPE.CONFIRM
+    );
+    
+    if (result === POPUP_RESULT.AFFIRMATIVE) {
+        const newName = $('.edit-name-input').val().trim();
+        
+        if (newName && newName.length > 0) {
+            if (newName === originalName) {
+                // 원본 이름과 같으면 customName 제거
+                delete item.customName;
+            } else {
+                item.customName = newName;
+            }
+            
+            saveSettingsDebounced();
+            refreshModalContent(menuType);
+            applyMenuCustomizations(menuType);
+            
+            toastr.success('이름이 수정되었습니다.');
+        }
     }
 }
 
@@ -1010,11 +1089,23 @@ function applyChatMenuCustomizations(settings) {
         }
     });
     
-    // 숨김 처리
+    // 숨김 처리 및 커스텀 이름 적용
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
-        if ($menuItem.length > 0 && item.hidden) {
-            $menuItem.addClass('menu-customizer-hidden');
+        if ($menuItem.length > 0) {
+            if (item.hidden) {
+                $menuItem.addClass('menu-customizer-hidden');
+            }
+            
+            // 커스텀 이름 적용
+            if (item.customName) {
+                const $span = $menuItem.find('span[data-i18n]');
+                if ($span.length > 0) {
+                    $span.text(item.customName);
+                } else {
+                    $menuItem.find('span').first().text(item.customName);
+                }
+            }
         }
     });
     
@@ -1118,11 +1209,21 @@ function applyExtensionMenuCustomizations(settings) {
         }
     });
     
-    // 숨김 처리
+    // 숨김 처리 및 커스텀 이름 적용
     settings.items.forEach(item => {
         const $menuItem = $(`#${item.id}`);
-        if ($menuItem.length > 0 && item.hidden) {
-            $menuItem.addClass('menu-customizer-hidden');
+        if ($menuItem.length > 0) {
+            if (item.hidden) {
+                $menuItem.addClass('menu-customizer-hidden');
+            }
+            
+            // 커스텀 이름 적용
+            if (item.customName) {
+                const $span = $menuItem.find('span').first();
+                if ($span.length > 0) {
+                    $span.text(item.customName);
+                }
+            }
         }
     });
     

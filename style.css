@@ -256,6 +256,52 @@
     color: #ff6b6b;
 }
 
+/* 토글 아이콘 색상 */
+.menu-customizer-item-visibility i.fa-toggle-on {
+    color: #4ecdc4;
+}
+
+.menu-customizer-item-visibility i.fa-toggle-off {
+    color: #666;
+}
+
+/* 연필 아이콘 (이름 수정) */
+.menu-customizer-item-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    background: transparent;
+    border: none;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    opacity: 0.6;
+}
+
+.menu-customizer-item-edit:hover {
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+    color: #ffc107;
+}
+
+.menu-customizer-item-edit i {
+    font-size: 14px;
+}
+
+/* 커스텀 이름 표시 */
+.menu-customizer-item-name.custom-name {
+    color: #ffc107;
+    font-style: italic;
+}
+
+.menu-customizer-item-name.custom-name::after {
+    content: " ✎";
+    font-size: 10px;
+    opacity: 0.7;
+}
+
 /* ===== 카테고리 ===== */
 .menu-customizer-category {
     border: 1px solid var(--SmartThemeBorderColor, #3a3a5a);
@@ -717,5 +763,73 @@
 
 .menu-customizer-add-modal-confirm:hover {
     filter: brightness(1.1);
+}
+
+/* ===== 이름 수정 모달 ===== */
+.menu-customizer-edit-name-modal {
+    padding: 10px 0;
+}
+
+.menu-customizer-edit-name-modal p {
+    margin: 0 0 15px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+}
+
+.edit-name-input-container {
+    margin-bottom: 15px;
+}
+
+.edit-name-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.edit-name-original {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(100, 100, 200, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(100, 100, 200, 0.2);
+}
+
+.edit-name-original span {
+    color: var(--SmartThemeBodyColor, #888);
+    font-size: 13px;
+}
+
+.edit-name-original strong {
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font-size: 14px;
+    flex: 1;
+}
+
+.edit-name-restore {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, rgba(100, 100, 200, 0.3), rgba(100, 100, 200, 0.2));
+    border: 1px solid rgba(100, 100, 200, 0.4);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    transition: all 0.2s;
+}
+
+.edit-name-restore:hover {
+    background: linear-gradient(135deg, rgba(100, 100, 200, 0.5), rgba(100, 100, 200, 0.3));
+    border-color: rgba(100, 100, 200, 0.6);
+}
+
+.edit-name-restore i {
+    font-size: 12px;
 }
 
