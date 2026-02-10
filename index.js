@@ -701,30 +701,67 @@ async function showAddItemsToCategoryModal(menuType, categoryId) {
     
     const itemsHtml = availableItems.map(item => `
         <label class="menu-customizer-add-item-option">
-            <input type="checkbox" value="${item.id}">
+            <input type="checkbox" value="${item.id}" data-item-id="${item.id}">
             <i class="fa-solid ${item.icon || 'fa-question'}"></i>
             <span>${item.name}</span>
         </label>
     `).join('');
     
-    const modalHtml = `
-        <div class="menu-customizer-add-items-modal">
-            <p>"${category.name}" 카테고리에 추가할 항목을 선택하세요:</p>
-            <div class="menu-customizer-add-items-list">
-                ${itemsHtml}
+    // 기존 추가 모달 제거
+    $('.menu-customizer-add-modal-backdrop').remove();
+    
+    const addModalHtml = `
+        <div class="menu-customizer-add-modal-backdrop">
+            <div class="menu-customizer-add-modal">
+                <div class="menu-customizer-add-modal-header">
+                    <h4>"${category.name}" 카테고리에 추가할 항목 선택</h4>
+                    <button class="menu-customizer-add-modal-close">×</button>
+                </div>
+                <div class="menu-customizer-add-modal-body">
+                    <div class="menu-customizer-add-items-list">
+                        ${itemsHtml}
+                    </div>
+                </div>
+                <div class="menu-customizer-add-modal-footer">
+                    <button class="menu-customizer-add-modal-cancel">취소</button>
+                    <button class="menu-customizer-add-modal-confirm">추가</button>
+                </div>
             </div>
         </div>
     `;
     
-    const result = await callGenericPopup(
-        modalHtml,
-        POPUP_TYPE.CONFIRM
-    );
+    const $addModal = $(addModalHtml);
+    $('body').append($addModal);
     
-    if (result === POPUP_RESULT.AFFIRMATIVE) {
+    // 애니메이션
+    setTimeout(() => {
+        $addModal.addClass('visible');
+        $addModal.find('.menu-customizer-add-modal').addClass('visible');
+    }, 10);
+    
+    // 닫기 함수
+    const closeAddModal = () => {
+        $addModal.removeClass('visible');
+        $addModal.find('.menu-customizer-add-modal').removeClass('visible');
+        setTimeout(() => {
+            $addModal.remove();
+        }, 300);
+    };
+    
+    // 이벤트 핸들러
+    $addModal.find('.menu-customizer-add-modal-close, .menu-customizer-add-modal-cancel').on('click', closeAddModal);
+    
+    $addModal.find('.menu-customizer-add-modal-backdrop').on('click', function(e) {
+        if (e.target === this) {
+            closeAddModal();
+        }
+    });
+    
+    // 확인 버튼
+    $addModal.find('.menu-customizer-add-modal-confirm').on('click', function() {
         const selectedItems = [];
-        $('.menu-customizer-add-item-option input:checked').each(function() {
-            selectedItems.push($(this).val());
+        $addModal.find('.menu-customizer-add-item-option input:checked').each(function() {
+            selectedItems.push($(this).data('item-id'));
         });
         
         if (selectedItems.length > 0) {
@@ -737,10 +774,15 @@ async function showAddItemsToCategoryModal(menuType, categoryId) {
             
             saveSettingsDebounced();
             refreshModalContent(menuType);
+            applyMenuCustomizations(menuType);
             
             toastr.success(`${selectedItems.length}개 항목이 카테고리에 추가되었습니다.`);
+        } else {
+            toastr.info('선택된 항목이 없습니다.');
         }
-    }
+        
+        closeAddModal();
+    });
 }
 
 /**

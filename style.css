@@ -583,3 +583,127 @@
     }
 }
 
+/* ===== 커스텀 추가 모달 ===== */
+.menu-customizer-add-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.menu-customizer-add-modal-backdrop.visible {
+    opacity: 1;
+}
+
+.menu-customizer-add-modal {
+    background: var(--SmartThemeBlurTintColor, #1a1a2e);
+    border: 1px solid var(--SmartThemeBorderColor, #3a3a5a);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    transform: scale(0.9) translateY(-20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.menu-customizer-add-modal.visible {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.menu-customizer-add-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor, #3a3a5a);
+    background: linear-gradient(135deg, rgba(100, 100, 200, 0.15), transparent);
+    border-radius: 12px 12px 0 0;
+}
+
+.menu-customizer-add-modal-header h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+}
+
+.menu-customizer-add-modal-close {
+    background: none;
+    border: none;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 6px;
+    line-height: 1;
+    opacity: 0.7;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.menu-customizer-add-modal-close:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff6b6b;
+}
+
+.menu-customizer-add-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.menu-customizer-add-modal-body .menu-customizer-add-items-list {
+    max-height: none;
+}
+
+.menu-customizer-add-modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--SmartThemeBorderColor, #3a3a5a);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 12px 12px;
+}
+
+.menu-customizer-add-modal-footer button {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.menu-customizer-add-modal-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+}
+
+.menu-customizer-add-modal-cancel:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.menu-customizer-add-modal-confirm {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: white;
+}
+
+.menu-customizer-add-modal-confirm:hover {
+    filter: brightness(1.1);
+}
+
