@@ -718,7 +718,7 @@ function toggleItemVisibility(menuType, itemId, hidden) {
 /**
  * 항목 이름 수정
  */
-async function editItemName(menuType, itemId) {
+function editItemName(menuType, itemId) {
     const settings = extension_settings[pluginName][menuType];
     const item = settings.items.find(i => i.id === itemId);
     
@@ -727,40 +727,82 @@ async function editItemName(menuType, itemId) {
     const originalName = item.name;
     const currentName = item.customName || item.name;
     
+    // 기존 모달 제거
+    $('.menu-customizer-edit-name-backdrop').remove();
+    
     // 커스텀 모달 생성
     const modalHtml = `
-        <div class="menu-customizer-edit-name-modal">
-            <p>메뉴 항목 이름 수정</p>
-            <div class="edit-name-input-container">
-                <input type="text" class="edit-name-input text_pole" value="${currentName}" placeholder="새 이름 입력">
-            </div>
-            <div class="edit-name-original">
-                <span>원본 이름: </span>
-                <strong class="original-name-text">${originalName}</strong>
-                <button type="button" class="edit-name-restore menu_button" title="원본 이름으로 복원">
-                    <i class="fa-solid fa-rotate-left"></i> 복원
-                </button>
+        <div class="menu-customizer-edit-name-backdrop">
+            <div class="menu-customizer-edit-name-modal">
+                <div class="edit-name-header">
+                    <h4>메뉴 항목 이름 수정</h4>
+                    <button type="button" class="edit-name-close">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="edit-name-body">
+                    <div class="edit-name-input-container">
+                        <label>새 이름</label>
+                        <input type="text" class="edit-name-input text_pole" value="${currentName}" placeholder="새 이름 입력">
+                    </div>
+                    <div class="edit-name-original">
+                        <span>원본 이름: </span>
+                        <strong class="original-name-text">${originalName}</strong>
+                        <button type="button" class="edit-name-restore" title="원본 이름으로 복원">
+                            <i class="fa-solid fa-rotate-left"></i> 복원
+                        </button>
+                    </div>
+                </div>
+                <div class="edit-name-footer">
+                    <button type="button" class="edit-name-cancel">취소</button>
+                    <button type="button" class="edit-name-confirm">확인</button>
+                </div>
             </div>
         </div>
     `;
     
-    // 복원 버튼 이벤트 바인딩 (팝업 렌더링 후)
+    const $modal = $(modalHtml);
+    $('body').append($modal);
+    
+    // 애니메이션
     setTimeout(() => {
-        $('.edit-name-restore').off('click').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $('.edit-name-input').val(originalName);
-            toastr.info('원본 이름으로 복원되었습니다. 확인을 눌러 저장하세요.');
-        });
-    }, 100);
+        $modal.addClass('visible');
+        $modal.find('.menu-customizer-edit-name-modal').addClass('visible');
+        $modal.find('.edit-name-input').focus().select();
+    }, 10);
     
-    const result = await callGenericPopup(
-        modalHtml,
-        POPUP_TYPE.CONFIRM
-    );
+    // 닫기 함수
+    const closeEditModal = () => {
+        $modal.removeClass('visible');
+        $modal.find('.menu-customizer-edit-name-modal').removeClass('visible');
+        setTimeout(() => $modal.remove(), 200);
+    };
     
-    if (result === POPUP_RESULT.AFFIRMATIVE) {
-        const newName = $('.edit-name-input').val().trim();
+    // 복원 버튼
+    $modal.find('.edit-name-restore').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $modal.find('.edit-name-input').val(originalName);
+        toastr.info('원본 이름으로 복원되었습니다. 확인을 눌러 저장하세요.');
+    });
+    
+    // 취소 버튼
+    $modal.find('.edit-name-cancel, .edit-name-close').on('click', function(e) {
+        e.preventDefault();
+        closeEditModal();
+    });
+    
+    // 배경 클릭
+    $modal.on('click', function(e) {
+        if ($(e.target).hasClass('menu-customizer-edit-name-backdrop')) {
+            closeEditModal();
+        }
+    });
+    
+    // 확인 버튼
+    $modal.find('.edit-name-confirm').on('click', function(e) {
+        e.preventDefault();
+        const newName = $modal.find('.edit-name-input').val().trim();
         
         if (newName && newName.length > 0) {
             if (newName === originalName) {
@@ -776,7 +818,20 @@ async function editItemName(menuType, itemId) {
             
             toastr.success('이름이 수정되었습니다.');
         }
-    }
+        
+        closeEditModal();
+    });
+    
+    // Enter 키로 확인
+    $modal.find('.edit-name-input').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $modal.find('.edit-name-confirm').click();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeEditModal();
+        }
+    });
 }
 
 /**
