@@ -1291,19 +1291,132 @@
         padding: 10px 14px;
         font-size: 12px;
     }
+}
+
+/* ===== 이름 수정 모달 반응형 ===== */
+
+/* 태블릿 (768px 이하) */
+@media (max-width: 768px) {
+    .menu-customizer-edit-name-modal {
+        width: 94vw;
+        max-width: none;
+    }
     
-    /* 이름 수정 모달도 반응형 */
+    .edit-name-header h4 {
+        font-size: 14px;
+    }
+    
+    .edit-name-input-container label {
+        font-size: 12px;
+    }
+    
+    .edit-name-input {
+        padding: 9px 11px;
+        font-size: 13px;
+    }
+    
+    .edit-name-original {
+        padding: 10px;
+    }
+    
+    .edit-name-original span {
+        font-size: 12px;
+    }
+    
+    .edit-name-original strong {
+        font-size: 13px;
+    }
+    
+    .edit-name-restore {
+        padding: 5px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+}
+
+/* 중간 화면 (600px 이하) */
+@media (max-width: 600px) {
     .menu-customizer-edit-name-modal {
         width: 95vw;
         max-width: none;
     }
     
     .edit-name-header {
+        padding: 12px 16px;
+    }
+    
+    .edit-name-header h4 {
+        font-size: 14px;
+    }
+    
+    .edit-name-body {
+        padding: 16px;
+    }
+    
+    .edit-name-footer {
+        padding: 12px 16px;
+    }
+    
+    .edit-name-footer button {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+/* 스마트폰 (480px 이하) */
+@media (max-width: 480px) {
+    .menu-customizer-edit-name-modal {
+        width: 96vw;
+        max-width: none;
+        border-radius: 10px;
+    }
+    
+    .edit-name-header {
         padding: 10px 14px;
+    }
+    
+    .edit-name-header h4 {
+        font-size: 13px;
+    }
+    
+    .edit-name-close {
+        font-size: 16px;
     }
     
     .edit-name-body {
         padding: 14px;
+    }
+    
+    .edit-name-input-container {
+        margin-bottom: 12px;
+    }
+    
+    .edit-name-input {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    
+    .edit-name-original {
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .edit-name-original span {
+        font-size: 11px;
+    }
+    
+    .edit-name-original strong {
+        font-size: 12px;
+        flex: 1;
+        min-width: 100%;
+        word-break: break-word;
+    }
+    
+    .edit-name-restore {
+        padding: 5px 8px;
+        font-size: 11px;
+        margin-left: auto;
     }
     
     .edit-name-footer {
@@ -1311,7 +1424,7 @@
     }
     
     .edit-name-footer button {
-        padding: 6px 12px;
+        padding: 7px 14px;
         font-size: 12px;
     }
 }
