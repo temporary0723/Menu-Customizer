@@ -1295,11 +1295,39 @@
 
 /* ===== 이름 수정 모달 반응형 ===== */
 
+/* 태블릿 (950px 이하) - 카테고리 추가 모달과 동일하게 */
+@media (max-width: 950px) {
+    .menu-customizer-edit-name-backdrop {
+        align-items: flex-start;
+        padding-top: 5vh;
+        padding-top: 5dvh;
+        padding-bottom: 5vh;
+        padding-bottom: 5dvh;
+    }
+    
+    .menu-customizer-edit-name-modal {
+        width: 90vw;
+        max-width: none;
+        margin: 0 auto;
+        transform: scale(0.98) translateY(-20px);
+    }
+    
+    .menu-customizer-edit-name-modal.visible {
+        transform: scale(1) translateY(0);
+    }
+}
+
 /* 태블릿 (768px 이하) */
 @media (max-width: 768px) {
+    .menu-customizer-edit-name-backdrop {
+        padding-top: 4vh;
+        padding-top: 4dvh;
+        padding-bottom: 4vh;
+        padding-bottom: 4dvh;
+    }
+    
     .menu-customizer-edit-name-modal {
-        width: 94vw;
-        max-width: none;
+        width: 92vw;
     }
     
     .edit-name-header h4 {
@@ -1336,9 +1364,15 @@
 
 /* 중간 화면 (600px 이하) */
 @media (max-width: 600px) {
+    .menu-customizer-edit-name-backdrop {
+        padding-top: 3vh;
+        padding-top: 3dvh;
+        padding-bottom: 3vh;
+        padding-bottom: 3dvh;
+    }
+    
     .menu-customizer-edit-name-modal {
-        width: 95vw;
-        max-width: none;
+        width: 94vw;
     }
     
     .edit-name-header {
@@ -1365,9 +1399,15 @@
 
 /* 스마트폰 (480px 이하) */
 @media (max-width: 480px) {
+    .menu-customizer-edit-name-backdrop {
+        padding-top: 2vh;
+        padding-top: 2dvh;
+        padding-bottom: 2vh;
+        padding-bottom: 2dvh;
+    }
+    
     .menu-customizer-edit-name-modal {
         width: 96vw;
-        max-width: none;
         border-radius: 10px;
     }
     
